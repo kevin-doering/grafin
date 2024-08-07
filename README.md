@@ -31,7 +31,7 @@
 - QueryFolderResponse
 - GetFolderResponse
 
-## Examples:
+## Usage:
 
 ````shell
 # add a grafana team with admin rights with the name "Team1" and a viewer team with suffix "-Viewer"
