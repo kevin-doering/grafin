@@ -37,7 +37,7 @@
 # add a grafana team with admin rights with the name "Team1" and a viewer team with suffix "-Viewer"
 fi.exe add team -n Team17
 
-# add two teams and also add a grafana dashboard directory for the two teams
+# add two teams and also add a grafana dashboard directory for the two teams with permissions set.
 fi.exe add team -n Team17 -d
 
 # get a team by its id
