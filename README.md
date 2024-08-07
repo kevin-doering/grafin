@@ -35,35 +35,35 @@
 
 ````shell
 # add a grafana team with admin rights with the name "Team1" and a viewer team with suffix "-Viewer"
-fi.exe add team -n Team17
+grafin.exe add team -n Team17
 
 # add two teams and also add a grafana dashboard directory for the two teams with permissions set.
-fi.exe add team -n Team17 -d
+grafin.exe add team -n Team17 -d
 
 # get a team by its id
-fi.exe get team -i 17
+grafin.exe get team -i 17
 
 # query teams by name "Team*"
-fi.exe get team -q Team
+grafin.exe get team -q Team
 
 # delete a team by its id
-fi.exe del team -i 17
+grafin.exe del team -i 17
 
 # delete all teams with zero members (confirmation required)
-fi.exe del team -z
+grafin.exe del team -z
 
 # add folder without team
-fi.exe add folder -t Folder17
+grafin.exe add folder -t Folder17
 
 # get folder by its uid
-fi.exe get folder -u fdu0hhbnheoe8a
+grafin.exe get folder -u fdu0hhbnheoe8a
 
 # get all folders
-fi.exe get folder
+grafin.exe get folder
 
 # get folders with limit and page 
-fi.exe get folder -l 3 -p 1
+grafin.exe get folder -l 3 -p 1
 
 # override folder permissions for one admin team
-fi.exe add permission -f fdu0hhbnheoe8a -t 17 -p 4 
+grafin.exe add permission -f fdu0hhbnheoe8a -t 17 -p 4 
 ````
