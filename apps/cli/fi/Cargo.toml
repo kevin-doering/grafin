@@ -1,0 +1,18 @@
+[package]
+name = "fi"
+version = "0.1.0"
+edition = "2021"
+description = "fi grafana cli"
+default-run = "fi"
+
+[[bin]]
+name = "fi"
+path = "src/main.rs"
+
+[dependencies]
+clap = { workspace = true }
+reqwest = { workspace = true }
+dotenvy = { workspace = true }
+
+fi_grafana = { workspace = true }
+tokio = { version = "1.0.0", features = ["rt", "rt-multi-thread", "macros"] }

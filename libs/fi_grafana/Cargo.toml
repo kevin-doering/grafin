@@ -1,0 +1,16 @@
+[package]
+name = "fi_grafana"
+version = "0.1.0"
+edition = "2021"
+description = "f-i grafana request library"
+
+[dependencies]
+axum = { workspace = true }
+clap = { workspace = true }
+reqwest = { workspace = true, features = ["json"] }
+serde = { workspace = true }
+serde_with = { workspace = true }
+serde_json = { workspace = true }
+serde_yaml = { workspace = true }
+thiserror = { workspace = true }
+displaydoc = { workspace = true }
