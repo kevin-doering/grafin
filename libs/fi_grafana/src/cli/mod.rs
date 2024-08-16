@@ -1,3 +1,4 @@
+pub mod annotation;
 pub mod folder;
 pub mod role;
 pub mod service_account;
