@@ -1,8 +1,8 @@
 use serde::{Deserialize, Serialize};
 
 use crate::api::grafana::GrafanaClient;
+use crate::cli::folder::permission::post::{FolderPermissionItem, post_permission};
 use crate::cli::folder::post::post_folder;
-use crate::cli::permission::post::{FolderPermissionItem, post_permission};
 use crate::cli::shell::input::input_dialog;
 use crate::cli::team::options::TeamOptions;
 use crate::error::FiGrafanaError;

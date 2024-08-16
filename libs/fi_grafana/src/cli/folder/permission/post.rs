@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 use crate::api::grafana::GrafanaClient;
-use crate::cli::permission::options::PermissionOptions;
+use crate::cli::folder::permission::options::FolderPermissionOptions;
 use crate::cli::team::post::prompt_option;
 use crate::error::FiGrafanaError;
 
@@ -53,7 +53,7 @@ pub struct UpdateFolderPermissionResponse {
     pub message: String,
 }
 
-pub async fn handle_post_permission(client: &GrafanaClient, opt: &PermissionOptions) {
+pub async fn handle_post_permission(client: &GrafanaClient, opt: &FolderPermissionOptions) {
     let mut items = FolderPermissionItem::default_permissions_items();
     if let Some(team_id) = opt.team_id {
         if let Some(permission) = opt.permission {

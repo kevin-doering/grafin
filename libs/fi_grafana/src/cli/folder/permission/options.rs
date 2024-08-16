@@ -2,7 +2,7 @@ use clap::Args;
 
 /// The available options for folder permissions requests
 #[derive(Debug, Args, Clone)]
-pub struct PermissionOptions {
+pub struct FolderPermissionOptions {
     /// Use it to set (override) permissions on the folder with this uid
     #[arg(short, long)]
     pub folder_uid: Option<String>,

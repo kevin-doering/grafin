@@ -3,9 +3,9 @@ use clap::{Args, Parser, Subcommand};
 use crate::api::grafana::GrafanaClient;
 use crate::cli::folder::get::handle_get_folder;
 use crate::cli::folder::options::FolderOptions;
+use crate::cli::folder::permission::options::FolderPermissionOptions;
+use crate::cli::folder::permission::post::handle_post_permission;
 use crate::cli::folder::post::handle_post_folder;
-use crate::cli::permission::options::PermissionOptions;
-use crate::cli::permission::post::handle_post_permission;
 use crate::cli::role::Role;
 use crate::cli::service_account::ServiceAccount;
 use crate::cli::team::delete::handle_del_team;
@@ -70,8 +70,8 @@ pub enum NamedResource {
     T(TeamOptions),
     Folder(FolderOptions),
     F(FolderOptions),
-    Permission(PermissionOptions),
-    P(PermissionOptions),
+    Permission(FolderPermissionOptions),
+    P(FolderPermissionOptions),
     Role(Role),
     R(Role),
 }
