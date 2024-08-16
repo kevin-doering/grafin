@@ -26,32 +26,34 @@ pub async fn handle_del_team(client: &GrafanaClient, opt: &TeamOptions) {
             }
         }
     }
-    if let Some(member_zeroes) = opt.zero_members {
-        if member_zeroes {
-            match get_teams(&client, None).await {
-                Ok(response) => {
-                    println!("{} teams found in scope", response.total_count);
-                    for team_with_zero_members in response.get_zero_member_teams() {
-                        let confirmation = input_dialog(&format!("Delete team [{}] with [{}] members? (y/n)", team_with_zero_members.name, team_with_zero_members.member_count));
-                        if let Some(input) = confirmation {
-                            if input.eq("y") {
-                                match del_team_by_id(&client, team_with_zero_members.id).await {
-                                    Ok(response) => {
-                                        println!("{}", response.message);
-                                    }
-                                    Err(error) => {
-                                        eprintln!("{}", error);
-                                    }
+    if opt.zero_members {
+        match get_teams(&client, None).await {
+            Ok(response) => {
+                println!("{} teams found in scope", response.total_count);
+                for team_with_zero_members in response.get_zero_member_teams() {
+                    let confirmation = if opt.yes {
+                        Some("y".to_string())
+                    } else {
+                        input_dialog(&format!("Delete team [{}] with [{}] members? (y/n) ", team_with_zero_members.name, team_with_zero_members.member_count))
+                    };
+                    if let Some(input) = confirmation {
+                        if input.eq("y") {
+                            match del_team_by_id(&client, team_with_zero_members.id).await {
+                                Ok(response) => {
+                                    println!("{} [id: {}, name: {}]", response.message, team_with_zero_members.id, team_with_zero_members.name);
                                 }
-                            } else {
-                                println!("No confirmation. Skipping..");
+                                Err(error) => {
+                                    eprintln!("{}", error);
+                                }
                             }
+                        } else {
+                            println!("No clear delete confirmation. Skipping request..");
                         }
                     }
                 }
-                Err(error) => {
-                    eprintln!("{}", error);
-                }
+            }
+            Err(error) => {
+                eprintln!("{}", error);
             }
         }
     }

@@ -12,10 +12,12 @@ pub struct TeamOptions {
     pub org_id: Option<u32>,
     #[arg(short, long)]
     pub folder_title: Option<String>,
-    #[arg(short, long)]
-    pub zero_members: Option<bool>,
-    #[arg(short, long)]
+    #[arg(short, long, default_value_t = false)]
+    pub zero_members: bool,
+    #[arg(short, long, default_value_t = false)]
     pub directory: bool,
     #[arg(short, long)]
     pub query: Option<String>,
+    #[arg(short, long, default_value_t = false)]
+    pub yes: bool,
 }
