@@ -1,6 +1,8 @@
 use clap::{Args, Parser, Subcommand};
 
 use crate::api::grafana::GrafanaClient;
+use crate::cli::annotation::add::handle_add_annotation;
+use crate::cli::annotation::options::AnnotationOptions;
 use crate::cli::folder::add::handle_add_folder;
 use crate::cli::folder::get::handle_get_folder;
 use crate::cli::folder::options::FolderOptions;
@@ -19,25 +21,25 @@ pub mod input;
 #[derive(Parser)]
 #[clap(version, about, long_about = None)]
 #[clap(propagate_version = true)]
-pub struct FI {
+pub struct Cli {
     #[clap(subcommand)]
-    pub method: CrudRequest,
+    pub method: RequestMethod,
 }
 
 #[derive(Subcommand)]
-pub enum CrudRequest {
+pub enum RequestMethod {
     #[clap(arg_required_else_help = true)]
-    Add(PostRequest),
+    Add(AddRequest),
     #[clap(arg_required_else_help = true)]
     Get(GetRequest),
     #[clap(arg_required_else_help = true)]
-    Set(PutRequest),
+    Set(SetRequest),
     #[clap(arg_required_else_help = true)]
     Del(DelRequest),
 }
 
 #[derive(Debug, Args)]
-pub struct PostRequest {
+pub struct AddRequest {
     #[clap(subcommand)]
     pub resource: NamedResource,
 }
@@ -49,7 +51,7 @@ pub struct GetRequest {
 }
 
 #[derive(Debug, Args)]
-pub struct PutRequest {
+pub struct SetRequest {
     #[clap(subcommand)]
     pub resource: NamedResource,
 }
@@ -62,6 +64,8 @@ pub struct DelRequest {
 
 #[derive(Debug, Subcommand)]
 pub enum NamedResource {
+    Annotation(AnnotationOptions),
+    A(AnnotationOptions),
     ServiceAccount(ServiceAccount),
     SA(ServiceAccount),
     User(User),
@@ -76,8 +80,15 @@ pub enum NamedResource {
     R(Role),
 }
 
-pub async fn handle_add(client: &GrafanaClient, request: PostRequest) {
+pub async fn handle_add(client: &GrafanaClient, request: AddRequest) {
+    use NamedResource;
     match request.resource {
+        NamedResource::Annotation(opt) => {
+            handle_add_annotation(client, &opt).await;
+        }
+        NamedResource::A(opt) => {
+            handle_add_annotation(client, &opt).await;
+        }
         NamedResource::ServiceAccount(_) => {}
         NamedResource::SA(_) => {}
         NamedResource::User(_) => {}
@@ -103,6 +114,8 @@ pub async fn handle_add(client: &GrafanaClient, request: PostRequest) {
 
 pub async fn handle_get(client: &GrafanaClient, request: GetRequest) {
     match request.resource {
+        NamedResource::Annotation(_) => {}
+        NamedResource::A(_) => {}
         NamedResource::ServiceAccount(_) => {}
         NamedResource::SA(_) => {}
         NamedResource::User(_) => {}
@@ -126,8 +139,10 @@ pub async fn handle_get(client: &GrafanaClient, request: GetRequest) {
     }
 }
 
-pub async fn handle_set(client: &GrafanaClient, request: PutRequest) {
+pub async fn handle_set(client: &GrafanaClient, request: SetRequest) {
     match request.resource {
+        NamedResource::Annotation(_) => {}
+        NamedResource::A(_) => {}
         NamedResource::ServiceAccount(_) => {}
         NamedResource::SA(_) => {}
         NamedResource::User(_) => {}
@@ -149,6 +164,8 @@ pub async fn handle_set(client: &GrafanaClient, request: PutRequest) {
 
 pub async fn handle_del(client: &GrafanaClient, request: DelRequest) {
     match request.resource {
+        NamedResource::Annotation(_) => {}
+        NamedResource::A(_) => {}
         NamedResource::ServiceAccount(_) => {}
         NamedResource::SA(_) => {}
         NamedResource::User(_) => {}
