@@ -1,17 +1,17 @@
 use clap::{Args, Parser, Subcommand};
 
 use crate::api::grafana::GrafanaClient;
+use crate::cli::folder::add::handle_add_folder;
 use crate::cli::folder::get::handle_get_folder;
 use crate::cli::folder::options::FolderOptions;
 use crate::cli::folder::permission::options::FolderPermissionOptions;
-use crate::cli::folder::permission::post::handle_post_permission;
-use crate::cli::folder::post::handle_post_folder;
+use crate::cli::folder::permission::set::handle_set_folder_permissions;
 use crate::cli::role::Role;
 use crate::cli::service_account::ServiceAccount;
+use crate::cli::team::add::handle_add_team;
 use crate::cli::team::delete::handle_del_team;
 use crate::cli::team::get::handle_get_team;
 use crate::cli::team::options::TeamOptions;
-use crate::cli::team::post::handle_post_team;
 use crate::cli::user::User;
 
 pub mod input;
@@ -76,30 +76,26 @@ pub enum NamedResource {
     R(Role),
 }
 
-pub async fn handle_post(client: &GrafanaClient, request: PostRequest) {
+pub async fn handle_add(client: &GrafanaClient, request: PostRequest) {
     match request.resource {
         NamedResource::ServiceAccount(_) => {}
         NamedResource::SA(_) => {}
         NamedResource::User(_) => {}
         NamedResource::U(_) => {}
         NamedResource::Team(opt) => {
-            handle_post_team(client, &opt).await;
+            handle_add_team(client, &opt).await;
         }
         NamedResource::T(opt) => {
-            handle_post_team(client, &opt).await;
+            handle_add_team(client, &opt).await;
         }
         NamedResource::Folder(opt) => {
-            handle_post_folder(client, &opt).await;
+            handle_add_folder(client, &opt).await;
         }
         NamedResource::F(opt) => {
-            handle_post_folder(client, &opt).await;
+            handle_add_folder(client, &opt).await;
         }
-        NamedResource::Permission(opt) => {
-            handle_post_permission(client, &opt).await;
-        }
-        NamedResource::P(opt) => {
-            handle_post_permission(client, &opt).await;
-        }
+        NamedResource::Permission(_) => {}
+        NamedResource::P(_) => {}
         NamedResource::Role(_) => {}
         NamedResource::R(_) => {}
     }
@@ -130,7 +126,7 @@ pub async fn handle_get(client: &GrafanaClient, request: GetRequest) {
     }
 }
 
-pub async fn handle_put(_: &GrafanaClient, request: PutRequest) {
+pub async fn handle_set(client: &GrafanaClient, request: PutRequest) {
     match request.resource {
         NamedResource::ServiceAccount(_) => {}
         NamedResource::SA(_) => {}
@@ -140,8 +136,12 @@ pub async fn handle_put(_: &GrafanaClient, request: PutRequest) {
         NamedResource::T(_) => {}
         NamedResource::Folder(_) => {}
         NamedResource::F(_) => {}
-        NamedResource::Permission(_) => {}
-        NamedResource::P(_) => {}
+        NamedResource::Permission(opt) => {
+            handle_set_folder_permissions(client, &opt).await;
+        }
+        NamedResource::P(opt) => {
+            handle_set_folder_permissions(client, &opt).await;
+        }
         NamedResource::Role(_) => {}
         NamedResource::R(_) => {}
     }
