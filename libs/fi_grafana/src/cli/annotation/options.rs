@@ -1,33 +1,27 @@
 use clap::Args;
 
-/// The available options for team requests
+/// The available options for annotation requests
 #[derive(Debug, Args, Clone)]
 pub struct AnnotationOptions {
-    /// Use it to get or delete a team by its id
+    /// Use it in conjunction with the panel_id to add an annotation to a panel of a dashboard
     #[arg(short, long)]
-    pub id: Option<u32>,
-    /// Use it to add a team with this name
+    pub dashboard_uid: Option<String>,
+    /// Use it in conjunction with the dashboard_uid to add an annotation to a panel of a dashboard
     #[arg(short, long)]
-    pub name: Option<String>,
-    /// Use it to add a team with this email
+    pub panel_id: Option<u32>,
+    /// Use it to specify the datetime where the annotation should be placed [format: %Y-%m-%d %H:%M]
     #[arg(short, long)]
-    pub email: Option<String>,
-    /// Use it to add a team to an existing organization with this id
+    pub start_datetime: String,
+    /// Use it to specify a regional annotation with a datetime end [format: %Y-%m-%d %H:%M]
     #[arg(short, long)]
-    pub org_id: Option<u32>,
-    /// Use it to specify a folder title when the --directory flag is present (otherwise the team name is used)
+    pub end_datetime: Option<String>,
+    /// Use it to add tags to the annotation being added
     #[arg(short, long)]
-    pub folder_title: Option<String>,
-    /// Use it to delete all teams with zero members (confirmation required for each team with zero members)
+    pub tags: Vec<String>,
+    /// Use it to describe the annotation being added
+    #[arg(short, long)]
+    pub comment: String,
+    /// Use it to add an organizational annotation that is not associated with a panel of a dashboard
     #[arg(short, long, default_value_t = false)]
-    pub zero_members: bool,
-    /// Use it to also add a folder for the team during creation
-    #[arg(short, long, default_value_t = false)]
-    pub directory: bool,
-    /// Use it to get teams that match the given query name
-    #[arg(short, long)]
-    pub query: Option<String>,
-    /// Use it to confirm the deletion of zero member teams upfront
-    #[arg(short, long, default_value_t = false)]
-    pub yes: bool,
+    pub organizational: bool,
 }
