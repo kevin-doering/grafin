@@ -34,7 +34,7 @@ pub fn user_input(prompt: &str) -> Result<UserInput, GrafanaCliError> {
     match io::stdin().read_line(&mut input) {
         Ok(_) => {
             let trimmed_input = input.trim();
-            if let Ok(number) = input.parse::<u32>() {
+            if let Ok(number) = trimmed_input.parse::<u32>() {
                 Ok(UserInput::Number(number))
             } else {
                 Ok(UserInput::Text(trimmed_input.to_string()))
@@ -48,7 +48,10 @@ impl From<UserInput> for u32 {
     fn from(input: UserInput) -> Self {
         match input {
             UserInput::Number(n) => n,
-            UserInput::Text(_) => panic!("Expected a number, but got a string"),
+            UserInput::Text(s) => {
+                println!("{}", s);
+                panic!("Expected a number, but got a string");
+            }
         }
     }
 }
