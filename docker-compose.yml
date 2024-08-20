@@ -11,9 +11,11 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=admin
       - GF_USERS_ALLOW_SIGN_UP=false
       - GF_SERVER_ROOT_URL=http://localhost:3000
+      - TZ=Europe/Berlin
     volumes:
-      - grafana-storage:/var/lib/grafana
+      - grafana_data:/var/lib/grafana
     restart: unless-stopped
 
 volumes:
-  grafana-storage:
+  grafana_data:
+    driver: local
