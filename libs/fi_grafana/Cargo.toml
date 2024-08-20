@@ -6,8 +6,9 @@ description = "f-i grafana request library"
 
 [dependencies]
 axum = { workspace = true }
+chrono = { workspace = true }
 clap = { workspace = true }
-reqwest = { workspace = true, features = ["json"] }
+reqwest = { workspace = true }
 serde = { workspace = true }
 serde_with = { workspace = true }
 serde_json = { workspace = true }
