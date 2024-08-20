@@ -48,10 +48,7 @@ impl From<UserInput> for u32 {
     fn from(input: UserInput) -> Self {
         match input {
             UserInput::Number(n) => n,
-            UserInput::Text(s) => {
-                println!("{}", s);
-                panic!("Expected a number, but got a string");
-            }
+            UserInput::Text(_) => panic!("Expected a number, but got a string while parsing the user input from stdin")
         }
     }
 }
@@ -60,7 +57,7 @@ impl From<UserInput> for String {
     fn from(input: UserInput) -> Self {
         match input {
             UserInput::Text(s) => s,
-            UserInput::Number(_) => panic!("Expected a string, but got a number"),
+            UserInput::Number(_) => panic!("Expected a string, but got a number while parsing the user input from stdin"),
         }
     }
 }
