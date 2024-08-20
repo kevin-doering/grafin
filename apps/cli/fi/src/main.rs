@@ -12,19 +12,19 @@ async fn main() {
     let cli = Cli::parse();
     let api = env::var("GRAFANA_API_PATH").expect("GRAFANA_API_PATH env var not found");
     let token = env::var("SERVICE_ACCOUNT_TOKEN").expect("SERVICE_ACCOUNT_TOKEN env var not found");
-    let client = GrafanaClient::new(reqwest::Client::new(), api, token);
+    let grafana_client = GrafanaClient::new(reqwest::Client::new(), api, token);
     match cli.method {
         RequestMethod::Add(request) => {
-            handle_add(&client, request).await;
+            handle_add(&grafana_client, request).await;
         }
         RequestMethod::Get(request) => {
-            handle_get(&client, request).await;
+            handle_get(&grafana_client, request).await;
         }
         RequestMethod::Set(request) => {
-            handle_set(&client, request).await;
+            handle_set(&grafana_client, request).await;
         }
         RequestMethod::Del(request) => {
-            handle_del(&client, request).await;
+            handle_del(&grafana_client, request).await;
         }
     }
 }

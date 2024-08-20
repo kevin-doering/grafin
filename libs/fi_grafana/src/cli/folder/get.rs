@@ -2,7 +2,7 @@ use serde::Deserialize;
 
 use crate::api::grafana::GrafanaClient;
 use crate::cli::folder::options::FolderOptions;
-use crate::error::FiGrafanaError;
+use crate::error::GrafanaCliError;
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -33,9 +33,9 @@ pub struct GetFolderResponse {
     parents: Option<Vec<String>>,
 }
 
-pub async fn handle_get_folder(client: &GrafanaClient, opt: &FolderOptions) {
+pub async fn handle_get_folder(grafana_client: &GrafanaClient, opt: &FolderOptions) {
     if let Some(uid) = &opt.uid {
-        match get_folder_by_uid(client, uid.clone()).await {
+        match get_folder_by_uid(grafana_client, uid.clone()).await {
             Ok(response) => {
                 println!("Folder:");
                 println!("id: {} | uid: {} | title: {}", response.id, response.uid, response.title);
@@ -52,7 +52,7 @@ pub async fn handle_get_folder(client: &GrafanaClient, opt: &FolderOptions) {
     }
     let limit = opt.limit.unwrap_or(0);
     let page = opt.page.unwrap_or(0);
-    match query_folders(client, limit, page).await {
+    match query_folders(grafana_client, limit, page).await {
         Ok(response) => {
             println!("Folders ({}):", response.len());
             for folder in response {
@@ -65,24 +65,24 @@ pub async fn handle_get_folder(client: &GrafanaClient, opt: &FolderOptions) {
     }
 }
 
-async fn query_folders(client: &GrafanaClient, limit: u8, page: u8) -> Result<Vec<QueryFolderResponse>, FiGrafanaError> {
-    match client.query("folders", &[("limit", limit), ("page", page)]).await {
+async fn query_folders(grafana_client: &GrafanaClient, limit: u8, page: u8) -> Result<Vec<QueryFolderResponse>, GrafanaCliError> {
+    match grafana_client.query("folders", &[("limit", limit), ("page", page)]).await {
         Ok(response) => {
             Ok(response.json::<Vec<QueryFolderResponse>>().await?)
         }
         Err(error) => {
-            Err(FiGrafanaError::Request(error))
+            Err(GrafanaCliError::Request(error))
         }
     }
 }
 
-async fn get_folder_by_uid(client: &GrafanaClient, uid: String) -> Result<GetFolderResponse, FiGrafanaError> {
-    match client.get(&format!("folders/{}", uid)).await {
+async fn get_folder_by_uid(grafana_client: &GrafanaClient, uid: String) -> Result<GetFolderResponse, GrafanaCliError> {
+    match grafana_client.get(&format!("folders/{}", uid)).await {
         Ok(response) => {
             Ok(response.json::<GetFolderResponse>().await?)
         }
         Err(error) => {
-            Err(FiGrafanaError::Request(error))
+            Err(GrafanaCliError::Request(error))
         }
     }
 }

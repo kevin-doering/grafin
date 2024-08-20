@@ -2,8 +2,8 @@ use serde::{Deserialize, Serialize};
 
 use crate::api::grafana::GrafanaClient;
 use crate::cli::folder::permission::options::FolderPermissionOptions;
-use crate::cli::team::add::prompt_option;
-use crate::error::FiGrafanaError;
+use crate::cli::shell::input::prompt_option;
+use crate::error::GrafanaCliError;
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -53,24 +53,24 @@ pub struct SetFolderPermissionResponse {
     pub message: String,
 }
 
-pub async fn handle_set_folder_permissions(client: &GrafanaClient, opt: &FolderPermissionOptions) {
+pub async fn handle_set_folder_permissions(grafana_client: &GrafanaClient, opt: &FolderPermissionOptions) {
     let mut items = FolderPermissionItem::default_permissions_items();
     if let Some(team_id) = opt.team_id {
         if let Some(permission) = opt.permission {
             items.push(FolderPermissionItem::team(team_id, permission));
         }
     }
-    match set_folder_permissions(client, opt.folder_uid.clone(), items).await {
+    match set_folder_permissions(grafana_client, opt.folder_uid.clone(), items).await {
         Ok(_) => {}
         Err(_) => {}
     }
 }
 
-pub async fn set_folder_permissions(client: &GrafanaClient, folder_uid: Option<String>, items: Vec<FolderPermissionItem>) -> Result<SetFolderPermissionResponse, FiGrafanaError> {
+pub async fn set_folder_permissions(grafana_client: &GrafanaClient, folder_uid: Option<String>, items: Vec<FolderPermissionItem>) -> Result<SetFolderPermissionResponse, GrafanaCliError> {
     let update = SetFolderPermissionRequest { items: items.clone() };
-    let folder_uid = prompt_option("Enter the folder_uid: ", folder_uid);
+    let folder_uid = prompt_option("Enter the folder_uid: ", &folder_uid);
     if let Some(folder_uid) = folder_uid {
-        match post_set_folder_permissions(client, &update, folder_uid.clone()).await {
+        match post_set_folder_permissions(grafana_client, &update, folder_uid.clone()).await {
             Ok(response) => {
                 println!("{} [uid: {}]", response.message, folder_uid);
                 for item in items {
@@ -89,17 +89,16 @@ pub async fn set_folder_permissions(client: &GrafanaClient, folder_uid: Option<S
             }
             Err(error) => {
                 eprintln!("{}", error);
-                Err(FiGrafanaError::Request(error))
+                Err(GrafanaCliError::Request(error))
             }
         }
     } else {
-        Err(FiGrafanaError::CanNotUpdatePermissionsOnNonExistingFolder)
+        Err(GrafanaCliError::CanNotUpdatePermissionsOnNonExistingFolder)
     }
 }
 
-async fn post_set_folder_permissions(client: &GrafanaClient, request: &SetFolderPermissionRequest, folder_uid: String) -> Result<SetFolderPermissionResponse, reqwest::Error> {
-    // println!("{:#?}", request);
-    match client.post(&format!("folders/{}/permissions", folder_uid), request).await {
+async fn post_set_folder_permissions(grafana_client: &GrafanaClient, request: &SetFolderPermissionRequest, folder_uid: String) -> Result<SetFolderPermissionResponse, reqwest::Error> {
+    match grafana_client.post(&format!("folders/{}/permissions", folder_uid), request).await {
         Ok(response) => Ok(response.json::<SetFolderPermissionResponse>().await?),
         Err(error) => Err(error)
     }

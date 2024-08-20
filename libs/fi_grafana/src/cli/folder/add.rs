@@ -2,8 +2,8 @@ use serde::{Deserialize, Serialize};
 
 use crate::api::grafana::GrafanaClient;
 use crate::cli::folder::options::FolderOptions;
-use crate::cli::team::add::prompt_option;
-use crate::error::FiGrafanaError;
+use crate::cli::shell::input::prompt_option;
+use crate::error::GrafanaCliError;
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -29,10 +29,10 @@ pub struct AddFolderResponse {
     pub version: u32,
 }
 
-pub async fn handle_add_folder(client: &GrafanaClient, opt: &FolderOptions) {
-    let title = prompt_option("Enter the folder title: ", opt.title.clone());
+pub async fn handle_add_folder(grafana_client: &GrafanaClient, opt: &FolderOptions) {
+    let title = prompt_option("Enter the folder title: ", &opt.title);
     if let Some(title) = title {
-        match add_folder(client, title).await {
+        match add_folder(grafana_client, title).await {
             Ok(response) => {
                 println!("folder url: {}", response.url);
             }
@@ -43,22 +43,22 @@ pub async fn handle_add_folder(client: &GrafanaClient, opt: &FolderOptions) {
     }
 }
 
-pub async fn add_folder(client: &GrafanaClient, title: String) -> Result<AddFolderResponse, FiGrafanaError> {
+pub async fn add_folder(grafana_client: &GrafanaClient, title: String) -> Result<AddFolderResponse, GrafanaCliError> {
     let request = AddFolderRequest { title: title.clone() };
-    match post_add_folder(client, &request).await {
+    match post_add_folder(grafana_client, &request).await {
         Ok(response) => {
             println!("Folder created [uid: {}, title: {}]", response.uid, title);
             Ok(response)
         }
         Err(error) => {
             eprintln!("{}", error);
-            Err(FiGrafanaError::Request(error))
+            Err(GrafanaCliError::Request(error))
         }
     }
 }
 
-async fn post_add_folder(client: &GrafanaClient, request: &AddFolderRequest) -> Result<AddFolderResponse, reqwest::Error> {
-    match client.post("folders", request).await {
+async fn post_add_folder(grafana_client: &GrafanaClient, request: &AddFolderRequest) -> Result<AddFolderResponse, reqwest::Error> {
+    match grafana_client.post("folders", request).await {
         Ok(response) => Ok(response.json::<AddFolderResponse>().await?),
         Err(error) => Err(error)
     }

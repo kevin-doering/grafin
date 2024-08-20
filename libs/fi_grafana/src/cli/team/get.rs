@@ -2,7 +2,7 @@ use serde::Deserialize;
 
 use crate::api::grafana::GrafanaClient;
 use crate::cli::team::options::TeamOptions;
-use crate::error::FiGrafanaError;
+use crate::error::GrafanaCliError;
 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -30,9 +30,9 @@ pub struct GetTeamResponse {
     pub member_count: u32,
 }
 
-pub async fn handle_get_team(client: &GrafanaClient, opt: &TeamOptions) {
+pub async fn handle_get_team(grafana_client: &GrafanaClient, opt: &TeamOptions) {
     if let Some(team_id) = opt.id {
-        match get_team_by_id(client, team_id).await {
+        match get_team_by_id(grafana_client, team_id).await {
             Ok(response) => {
                 println!("Team:");
                 println!("id: {} | name: {} | org_id: {} | email: {}", response.id, response.name, response.org_id, response.email);
@@ -45,7 +45,7 @@ pub async fn handle_get_team(client: &GrafanaClient, opt: &TeamOptions) {
             }
         }
     }
-    match get_teams(client, opt.query.clone()).await {
+    match get_teams(grafana_client, opt.query.clone()).await {
         Ok(response) => {
             println!("Teams ({}):", response.total_count);
             for team in response.teams {
@@ -58,25 +58,25 @@ pub async fn handle_get_team(client: &GrafanaClient, opt: &TeamOptions) {
     }
 }
 
-pub async fn get_team_by_id(client: &GrafanaClient, team_id: u32) -> Result<GetTeamResponse, FiGrafanaError> {
-    match client.get(&format!("teams/{}", team_id)).await {
+pub async fn get_team_by_id(grafana_client: &GrafanaClient, team_id: u32) -> Result<GetTeamResponse, GrafanaCliError> {
+    match grafana_client.get(&format!("teams/{}", team_id)).await {
         Ok(response) => {
             Ok(response.json::<GetTeamResponse>().await?)
         }
         Err(error) => {
-            Err(FiGrafanaError::Request(error))
+            Err(GrafanaCliError::Request(error))
         }
     }
 }
 
-pub async fn get_teams(client: &GrafanaClient, query: Option<String>) -> Result<SearchTeamsResponse, reqwest::Error> {
+pub async fn get_teams(grafana_client: &GrafanaClient, query: Option<String>) -> Result<SearchTeamsResponse, reqwest::Error> {
     if let Some(name) = query {
-        match client.query("teams/search", &[("query", name)]).await {
+        match grafana_client.query("teams/search", &[("query", name)]).await {
             Ok(response) => Ok(response.json::<SearchTeamsResponse>().await?),
             Err(error) => Err(error)
         }
     } else {
-        match client.get("teams/search").await {
+        match grafana_client.get("teams/search").await {
             Ok(response) => Ok(response.json::<SearchTeamsResponse>().await?),
             Err(error) => Err(error)
         }

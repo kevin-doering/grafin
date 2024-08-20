@@ -80,30 +80,30 @@ pub enum NamedResource {
     R(Role),
 }
 
-pub async fn handle_add(client: &GrafanaClient, request: AddRequest) {
+pub async fn handle_add(grafana_client: &GrafanaClient, request: AddRequest) {
     use NamedResource;
     match request.resource {
         NamedResource::Annotation(opt) => {
-            handle_add_annotation(client, &opt).await;
+            handle_add_annotation(grafana_client, &opt).await;
         }
         NamedResource::A(opt) => {
-            handle_add_annotation(client, &opt).await;
+            handle_add_annotation(grafana_client, &opt).await;
         }
         NamedResource::ServiceAccount(_) => {}
         NamedResource::SA(_) => {}
         NamedResource::User(_) => {}
         NamedResource::U(_) => {}
         NamedResource::Team(opt) => {
-            handle_add_team(client, &opt).await;
+            handle_add_team(grafana_client, &opt).await;
         }
         NamedResource::T(opt) => {
-            handle_add_team(client, &opt).await;
+            handle_add_team(grafana_client, &opt).await;
         }
         NamedResource::Folder(opt) => {
-            handle_add_folder(client, &opt).await;
+            handle_add_folder(grafana_client, &opt).await;
         }
         NamedResource::F(opt) => {
-            handle_add_folder(client, &opt).await;
+            handle_add_folder(grafana_client, &opt).await;
         }
         NamedResource::Permission(_) => {}
         NamedResource::P(_) => {}
@@ -112,7 +112,7 @@ pub async fn handle_add(client: &GrafanaClient, request: AddRequest) {
     }
 }
 
-pub async fn handle_get(client: &GrafanaClient, request: GetRequest) {
+pub async fn handle_get(grafana_client: &GrafanaClient, request: GetRequest) {
     match request.resource {
         NamedResource::Annotation(_) => {}
         NamedResource::A(_) => {}
@@ -121,16 +121,16 @@ pub async fn handle_get(client: &GrafanaClient, request: GetRequest) {
         NamedResource::User(_) => {}
         NamedResource::U(_) => {}
         NamedResource::Team(opt) => {
-            handle_get_team(client, &opt).await;
+            handle_get_team(grafana_client, &opt).await;
         }
         NamedResource::T(opt) => {
-            handle_get_team(client, &opt).await;
+            handle_get_team(grafana_client, &opt).await;
         }
         NamedResource::Folder(opt) => {
-            handle_get_folder(client, &opt).await;
+            handle_get_folder(grafana_client, &opt).await;
         }
         NamedResource::F(opt) => {
-            handle_get_folder(client, &opt).await;
+            handle_get_folder(grafana_client, &opt).await;
         }
         NamedResource::Permission(_) => {}
         NamedResource::P(_) => {}
@@ -139,7 +139,7 @@ pub async fn handle_get(client: &GrafanaClient, request: GetRequest) {
     }
 }
 
-pub async fn handle_set(client: &GrafanaClient, request: SetRequest) {
+pub async fn handle_set(grafana_client: &GrafanaClient, request: SetRequest) {
     match request.resource {
         NamedResource::Annotation(_) => {}
         NamedResource::A(_) => {}
@@ -152,17 +152,17 @@ pub async fn handle_set(client: &GrafanaClient, request: SetRequest) {
         NamedResource::Folder(_) => {}
         NamedResource::F(_) => {}
         NamedResource::Permission(opt) => {
-            handle_set_folder_permissions(client, &opt).await;
+            handle_set_folder_permissions(grafana_client, &opt).await;
         }
         NamedResource::P(opt) => {
-            handle_set_folder_permissions(client, &opt).await;
+            handle_set_folder_permissions(grafana_client, &opt).await;
         }
         NamedResource::Role(_) => {}
         NamedResource::R(_) => {}
     }
 }
 
-pub async fn handle_del(client: &GrafanaClient, request: DelRequest) {
+pub async fn handle_del(grafana_client: &GrafanaClient, request: DelRequest) {
     match request.resource {
         NamedResource::Annotation(_) => {}
         NamedResource::A(_) => {}
@@ -171,10 +171,10 @@ pub async fn handle_del(client: &GrafanaClient, request: DelRequest) {
         NamedResource::User(_) => {}
         NamedResource::U(_) => {}
         NamedResource::Team(opt) => {
-            handle_del_team(client, &opt).await;
+            handle_del_team(grafana_client, &opt).await;
         }
         NamedResource::T(opt) => {
-            handle_del_team(client, &opt).await;
+            handle_del_team(grafana_client, &opt).await;
         }
         NamedResource::Folder(_) => {}
         NamedResource::F(_) => {}
