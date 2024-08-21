@@ -1,17 +1,23 @@
 #[derive(Debug, thiserror::Error, displaydoc::Display)]
 pub enum GrafanaCliError {
-    /// A network error occurred: {0}
+    /// a network error occurred: {0}
     Request(#[from] reqwest::Error),
 
-    /// An I/O error occurred: {0}
+    /// an I/O error occurred: {0}
     IO(#[from] std::io::Error),
 
-    /// Team module error: {0}
-    NoTeamIdReceivedFromGrafanaOnTeamCreation(String),
+    /// no team id received from grafana server on team creation
+    NoTeamIdReceivedFromGrafanaOnTeamCreation,
 
-    /// Permission module error
+    /// can not update the permissions on a non-existing folder
     CanNotUpdatePermissionsOnNonExistingFolder,
 
-    /// Can not parse the datetime string to epoch time millis: {0}
+    /// datetime parse error: {0}
     CanNotParseDateTimeToEpochTimeMillis(#[from] chrono::ParseError),
+
+    /// can not parse the start_datetime to epoch time millis [format: %Y-%m-%d %H:%M]
+    CanNotParseTheStartDateTimeToEpochTimeMillis,
+
+    /// can not parse the end_datetime to epoch time millis [format: %Y-%m-%d %H:%M]
+    CanNotParseTheEndDateTimeToEpochTimeMillis,
 }
