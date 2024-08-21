@@ -109,7 +109,7 @@ async fn add_team(grafana_client: &GrafanaClient, name: String, opt: &TeamOption
                 Ok(response)
             } else {
                 println!("No team created! Reason: {}", response.message);
-                Err(GrafanaCliError::NoTeamIdReceivedFromGrafanaOnTeamCreation("No team id received from grafana on team creation!".to_string()))
+                Err(GrafanaCliError::NoTeamIdReceivedFromGrafanaOnTeamCreation)
             }
         }
         Err(error) => {
