@@ -1,9 +1,9 @@
-use chrono::NaiveDateTime;
 use serde::Deserialize;
 use serde_with::serde_derive::Serialize;
 
 use crate::api::grafana::GrafanaClient;
 use crate::cli::annotation::options::AnnotationOptions;
+use crate::cli::shell::date::from_datetime_to_epoch_time_millis;
 use crate::cli::shell::input::prompt_option;
 use crate::error::GrafanaCliError;
 
@@ -56,7 +56,10 @@ pub async fn add_annotation_to_dashboard_panel(grafana_client: &GrafanaClient, o
     let time_end = if let Some(end_datetime) = &opt.end_datetime {
         match from_datetime_to_epoch_time_millis(end_datetime) {
             Ok(time_end) => Some(time_end),
-            Err(_) => None
+            Err(error) => {
+                eprintln!("{}", error);
+                None
+            }
         }
     } else {
         None
@@ -82,14 +85,5 @@ async fn post_add_annotation_to_dashboard_panel(grafana_client: &GrafanaClient, 
         .post("annotations", request).await {
         Ok(response) => Ok(response.json::<AddAnnotationResponse>().await?),
         Err(error) => Err(GrafanaCliError::Request(error))
-    }
-}
-
-fn from_datetime_to_epoch_time_millis(datetime_str: &str) -> Result<i64, GrafanaCliError> {
-    let datetime_format = "%Y-%m-%d %H:%M";
-    let datetime = NaiveDateTime::parse_from_str(datetime_str, datetime_format);
-    match datetime {
-        Ok(datetime) => Ok(datetime.and_utc().timestamp_millis()),
-        Err(error) => Err(GrafanaCliError::CanNotParseDateTimeToEpochTimeMillis(error))
     }
 }

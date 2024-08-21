@@ -4,7 +4,7 @@ use clap::Parser;
 use dotenvy::dotenv;
 
 use fi_grafana::api::grafana::GrafanaClient;
-use fi_grafana::cli::shell::{Cli, handle_add, handle_del, handle_get, handle_set, RequestMethod};
+use fi_grafana::cli::shell::request::{Cli, handle_add, handle_del, handle_get, handle_set, RequestMethod};
 
 #[tokio::main]
 async fn main() {
