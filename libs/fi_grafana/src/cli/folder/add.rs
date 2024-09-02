@@ -5,7 +5,7 @@ use crate::cli::folder::options::FolderOptions;
 use crate::cli::shell::input::prompt_option;
 use crate::error::GrafanaCliError;
 
-#[derive(Serialize)]
+#[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct AddFolderRequest {
     pub title: String,

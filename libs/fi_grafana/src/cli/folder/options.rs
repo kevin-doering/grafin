@@ -1,6 +1,6 @@
 use clap::Args;
 
-/// The available options for folder requests
+/// The available options for a folder request to grafana
 #[derive(Debug, Args, Clone)]
 pub struct FolderOptions {
     /// Use it to get a team by its uid

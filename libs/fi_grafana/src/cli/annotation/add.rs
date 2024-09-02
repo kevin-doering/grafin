@@ -35,7 +35,18 @@ pub struct AddAnnotationResponse {
 
 pub async fn handle_add_annotation(grafana_client: &GrafanaClient, opt: &AnnotationOptions) {
     if opt.organizational {
-        add_organizational_annotation(grafana_client, opt).await;
+        match add_organizational_annotation(grafana_client, opt).await {
+            Ok(response) => {
+                if let Some(id) = response.id {
+                    println!("{} [id: {}]", response.message, id);
+                } else {
+                    println!("{}", response.message);
+                }
+            }
+            Err(error) => {
+                eprintln!("{}", error);
+            }
+        }
     } else {
         match add_annotation_to_dashboard_panel(grafana_client, opt).await {
             Ok(response) => {
@@ -52,7 +63,29 @@ pub async fn handle_add_annotation(grafana_client: &GrafanaClient, opt: &Annotat
     }
 }
 
-pub async fn add_organizational_annotation(grafana_client: &GrafanaClient, opt: &AnnotationOptions) {}
+pub async fn add_organizational_annotation(grafana_client: &GrafanaClient, opt: &AnnotationOptions) -> Result<AddAnnotationResponse, GrafanaCliError> {
+    if opt.dashboard_uid.is_some() {
+        println!("Ignoring the 'dashboard_uid' because the 'organizational' flag is present which does not require a dashboard reference");
+    }
+    if opt.panel_id.is_some() {
+        println!("Ignoring the 'panel_id' because the 'organizational' flag is present which does not require a panel reference");
+    }
+    if opt.start_datetime.is_some() {
+        println!("Ignoring the 'start_datetime' because the 'organizational' flag is present which does not require a specified datetime");
+    }
+    if opt.end_datetime.is_some() {
+        println!("Ignoring the 'end_datetime' because the 'organizational' flag is present which does not require a specified datetime");
+    }
+    let request = AddAnnotationRequest {
+        dashboard_uid: None,
+        panel_id: None,
+        time: None,
+        time_end: None,
+        tags: opt.tags.clone(),
+        text: opt.comment.clone(),
+    };
+    post_add_annotation(grafana_client, &request).await
+}
 
 
 pub async fn add_annotation_to_dashboard_panel(grafana_client: &GrafanaClient, opt: &AnnotationOptions) -> Result<AddAnnotationResponse, GrafanaCliError> {
@@ -78,10 +111,10 @@ pub async fn add_annotation_to_dashboard_panel(grafana_client: &GrafanaClient, o
         tags: opt.tags.clone(),
         text: opt.comment.clone(),
     };
-    post_add_annotation_to_dashboard_panel(grafana_client, &request).await
+    post_add_annotation(grafana_client, &request).await
 }
 
-async fn post_add_annotation_to_dashboard_panel(grafana_client: &GrafanaClient, request: &AddAnnotationRequest) -> Result<AddAnnotationResponse, GrafanaCliError> {
+async fn post_add_annotation(grafana_client: &GrafanaClient, request: &AddAnnotationRequest) -> Result<AddAnnotationResponse, GrafanaCliError> {
     match grafana_client
         .post("annotations", request).await {
         Ok(response) => Ok(response.json::<AddAnnotationResponse>().await?),

@@ -3,6 +3,8 @@ use clap::{Args, Parser, Subcommand};
 use crate::api::grafana::GrafanaClient;
 use crate::cli::annotation::add::handle_add_annotation;
 use crate::cli::annotation::options::AnnotationOptions;
+use crate::cli::dashboard::add::handle_add_dashboard;
+use crate::cli::dashboard::options::DashboardOptions;
 use crate::cli::folder::add::handle_add_folder;
 use crate::cli::folder::get::handle_get_folder;
 use crate::cli::folder::options::FolderOptions;
@@ -64,6 +66,8 @@ pub struct DelRequest {
 pub enum NamedResource {
     Annotation(AnnotationOptions),
     A(AnnotationOptions),
+    Dashboard(DashboardOptions),
+    D(DashboardOptions),
     ServiceAccount(ServiceAccount),
     SA(ServiceAccount),
     User(User),
@@ -86,6 +90,12 @@ pub async fn handle_add(grafana_client: &GrafanaClient, request: AddRequest) {
         }
         NamedResource::A(opt) => {
             handle_add_annotation(grafana_client, &opt).await;
+        }
+        NamedResource::Dashboard(opt) => {
+            handle_add_dashboard(grafana_client, &opt).await;
+        }
+        NamedResource::D(opt) => {
+            handle_add_dashboard(grafana_client, &opt).await;
         }
         NamedResource::ServiceAccount(_) => {}
         NamedResource::SA(_) => {}
@@ -114,6 +124,8 @@ pub async fn handle_get(grafana_client: &GrafanaClient, request: GetRequest) {
     match request.resource {
         NamedResource::Annotation(_) => {}
         NamedResource::A(_) => {}
+        NamedResource::Dashboard(_) => {}
+        NamedResource::D(_) => {}
         NamedResource::ServiceAccount(_) => {}
         NamedResource::SA(_) => {}
         NamedResource::User(_) => {}
@@ -141,6 +153,8 @@ pub async fn handle_set(grafana_client: &GrafanaClient, request: SetRequest) {
     match request.resource {
         NamedResource::Annotation(_) => {}
         NamedResource::A(_) => {}
+        NamedResource::Dashboard(_) => {}
+        NamedResource::D(_) => {}
         NamedResource::ServiceAccount(_) => {}
         NamedResource::SA(_) => {}
         NamedResource::User(_) => {}
@@ -164,6 +178,8 @@ pub async fn handle_del(grafana_client: &GrafanaClient, request: DelRequest) {
     match request.resource {
         NamedResource::Annotation(_) => {}
         NamedResource::A(_) => {}
+        NamedResource::Dashboard(_) => {}
+        NamedResource::D(_) => {}
         NamedResource::ServiceAccount(_) => {}
         NamedResource::SA(_) => {}
         NamedResource::User(_) => {}

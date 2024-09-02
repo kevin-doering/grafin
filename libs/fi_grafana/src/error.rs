@@ -20,4 +20,7 @@ pub enum GrafanaCliError {
 
     /// can not parse the end_datetime to epoch time millis [format: %Y-%m-%d %H:%M]
     CanNotParseTheEndDateTimeToEpochTimeMillis,
+
+    /// an error occurred during request body parsing: {0}
+    InvalidResponseFormat(String),
 }
