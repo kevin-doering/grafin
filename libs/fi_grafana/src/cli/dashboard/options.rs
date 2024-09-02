@@ -1,10 +1,10 @@
 use clap::Args;
 
-/// The available option for a dashboard request to grafana
+/// The available option to post dashboards to grafana
 #[derive(Debug, Args, Clone)]
 pub struct DashboardOptions {
     /// Use it to ref a dashboard by its instance id
-    /// #[arg(short, long)]
+    #[arg(short, long)]
     pub id: Option<u32>,
     /// Use it to ref a dashboard by its unique identifier
     #[arg(short, long)]

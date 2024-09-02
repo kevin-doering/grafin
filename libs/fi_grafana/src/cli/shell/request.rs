@@ -4,6 +4,7 @@ use crate::api::grafana::GrafanaClient;
 use crate::cli::annotation::add::handle_add_annotation;
 use crate::cli::annotation::options::AnnotationOptions;
 use crate::cli::dashboard::add::handle_add_dashboard;
+use crate::cli::dashboard::get::handle_get_dashboard;
 use crate::cli::dashboard::options::DashboardOptions;
 use crate::cli::folder::add::handle_add_folder;
 use crate::cli::folder::get::handle_get_folder;
@@ -124,8 +125,12 @@ pub async fn handle_get(grafana_client: &GrafanaClient, request: GetRequest) {
     match request.resource {
         NamedResource::Annotation(_) => {}
         NamedResource::A(_) => {}
-        NamedResource::Dashboard(_) => {}
-        NamedResource::D(_) => {}
+        NamedResource::Dashboard(opt) => {
+            handle_get_dashboard(grafana_client, &opt).await;
+        }
+        NamedResource::D(opt) => {
+            handle_get_dashboard(grafana_client, &opt).await;
+        }
         NamedResource::ServiceAccount(_) => {}
         NamedResource::SA(_) => {}
         NamedResource::User(_) => {}

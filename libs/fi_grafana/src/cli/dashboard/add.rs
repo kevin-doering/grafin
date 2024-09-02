@@ -8,7 +8,7 @@ use crate::error::GrafanaCliError;
 #[serde(rename_all = "camelCase")]
 pub struct AddDashboardRequest {
     /// The dashboard schema to create
-    pub dashboard: DashboardRequest,
+    pub dashboard: PostDashboard,
     /// The folder where the dashboard lives
     pub folder_uid: Option<String>,
     /// The reasoning behind the change
@@ -19,7 +19,7 @@ pub struct AddDashboardRequest {
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
-pub struct DashboardRequest {
+pub struct PostDashboard {
     /// The incremental id of the grafana instance
     pub id: Option<u32>,
     /// The unique identifier across instances
@@ -39,7 +39,7 @@ pub struct DashboardRequest {
 impl AddDashboardRequest {
     pub fn new_by_option(opt: &DashboardOptions) -> Self {
         Self {
-            dashboard: DashboardRequest {
+            dashboard: PostDashboard {
                 id: opt.id,
                 uid: opt.uid.clone(),
                 title: opt.name.clone(),
