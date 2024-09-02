@@ -57,7 +57,7 @@ impl AddDashboardRequest {
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct DashboardSuccessResponse {
+pub struct AddDashboardSuccessResponse {
     pub id: u32,
     pub uid: String,
     pub url: String,
@@ -68,7 +68,7 @@ pub struct DashboardSuccessResponse {
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct DashboardErrorResponse {
+pub struct AddDashboardErrorResponse {
     pub message: String,
     pub status: String,
 }
@@ -96,16 +96,18 @@ async fn add_dashboard(grafana_client: &GrafanaClient, opt: &DashboardOptions) {
     }
 }
 
+pub type AddDashboardResponse = (Option<AddDashboardSuccessResponse>, Option<AddDashboardErrorResponse>);
+
 async fn post_add_dashboard(
     grafana_client: &GrafanaClient,
     request: &AddDashboardRequest,
-) -> Result<(Option<DashboardSuccessResponse>, Option<DashboardErrorResponse>), GrafanaCliError> {
+) -> Result<AddDashboardResponse, GrafanaCliError> {
     match grafana_client.post("dashboards/db", request).await {
         Ok(response) => {
             let body = response.text().await.map_err(GrafanaCliError::Request)?;
-            if let Ok(success) = serde_json::from_str::<DashboardSuccessResponse>(&body) {
+            if let Ok(success) = serde_json::from_str::<AddDashboardSuccessResponse>(&body) {
                 Ok((Some(success), None))
-            } else if let Ok(error) = serde_json::from_str::<DashboardErrorResponse>(&body) {
+            } else if let Ok(error) = serde_json::from_str::<AddDashboardErrorResponse>(&body) {
                 Ok((None, Some(error)))
             } else {
                 Err(GrafanaCliError::InvalidResponseFormat(body))
