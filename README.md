@@ -73,7 +73,7 @@ gfi.exe get folder -l 3 -p 1
 gfi.exe add permission -f fdu0hhbnheoe8a -t 17 -p 4 
 ```
 
-## Use case 2: Dashboards, Annotations, Folders
+## Use case 2: Dashboards, Panel, Annotations, Folders
 
 ```shell
 # add a dashboard with the name Dashboard17, a tag with text templated, browser timezone, schema_version 16, 
@@ -85,4 +85,13 @@ gfi.exe add dashboard -n Dashboard17 -t templated -z browser -s 16 -r 25 -m "add
 
 # get a dashboard with its meta info by its uid
 gfi.exe get dashboard -u cdwrrb1xgx5vkb
+
+# add an organizational annotation which does not belong to a dashboard nor panel
+gfi.exe add annotation -t tag -c comment -o
+
+# add an regional annotation with a maintenance tag to a dashboard panel which shows time series data
+gfi.exe add annotation -t maintenance -c comment -s '2024-09-03 11:00' -e '2024-09-03 12:30' -d bdvea4glj4fswf -p 1
+
+# add an point annotation with a maintenance tag to a dashboard panel which shows time series data
+gfi.exe add annotation -t maintenance -c comment -s '2024-09-03 10:30' -d bdvea4glj4fswf -p 1
 ```
