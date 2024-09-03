@@ -44,14 +44,14 @@ impl AddDashboardRequest {
             dashboard: PostDashboard {
                 id: opt.id,
                 uid: opt.uid.clone(),
-                title: opt.name.clone(),
+                title: opt.name.clone().unwrap_or("unnamed".to_string()),
                 tags: opt.tags.clone(),
                 timezone: opt.zone.clone(),
-                schema_version: opt.schema_version,
-                refresh: format!("{}s", opt.refresh_seconds),
+                schema_version: opt.schema_version.unwrap_or(0),
+                refresh: format!("{}s", opt.refresh_seconds.unwrap_or(25)),
             },
             folder_uid: opt.folder_uid.clone(),
-            message: opt.message.clone(),
+            message: opt.message.clone().unwrap_or("dashboard created".to_string()),
             overwrite: opt.overwrite,
         }
     }

@@ -26,17 +26,59 @@ pub struct GetDashboard {
     pub timezone: String,
     /// The defined schema version
     pub schema_version: u16,
-    /// The refresh rate in default seconds
-    pub refresh: String,
+    /// The dashboard version
+    pub version: u8,
 }
 
 #[derive(Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct GetDashboardMeta {
-    pub is_starred: bool,
+    pub r#type: String,
+    pub can_save: bool,
+    pub can_edit: bool,
+    pub can_admin: bool,
+    pub can_star: bool,
+    pub can_delete: bool,
+    pub slug: String,
     pub url: String,
+    pub expires: String,
+    pub created: String,
+    pub updated: String,
+    pub updated_by: String,
+    pub created_by: String,
+    pub version: u16,
+    pub has_acl: bool,
+    pub is_folder: bool,
     pub folder_id: u32,
     pub folder_uid: String,
+    pub folder_title: String,
+    pub folder_url: String,
+    pub provisioned: bool,
+    pub provisioned_external_id: String,
+    pub annotations_permissions: AnnotationsPermissions,
+}
+
+#[derive(Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct AnnotationsPermissions {
+    pub dashboard: DashboardAnnotationPermissions,
+    pub organization: OrganizationAnnotationPermissions,
+}
+
+#[derive(Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct DashboardAnnotationPermissions {
+    pub can_add: bool,
+    pub can_edit: bool,
+    pub can_delete: bool,
+}
+
+#[derive(Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct OrganizationAnnotationPermissions {
+    pub can_add: bool,
+    pub can_edit: bool,
+    pub can_delete: bool,
 }
 
 pub async fn handle_get_dashboard(grafana_client: &GrafanaClient, opt: &DashboardOptions) {
@@ -45,10 +87,10 @@ pub async fn handle_get_dashboard(grafana_client: &GrafanaClient, opt: &Dashboar
             Ok(response) => {
                 println!("Dashboard:");
                 println!("id: {} | uid: {} | name: {}", response.dashboard.id, response.dashboard.uid, response.dashboard.title);
-                println!("timezone: {} | refresh: {} | schema_version: {}", response.dashboard.timezone, response.dashboard.refresh, response.dashboard.schema_version);
+                println!("timezone: {} | version: {} | schema_version: {}", response.dashboard.timezone, response.dashboard.version, response.dashboard.schema_version);
                 println!("tags: [{}]", response.dashboard.tags.join(", "));
                 println!("Folder:");
-                println!("id: {} | uid: {} | is_starred: {}", response.meta.folder_id, response.meta.folder_uid, response.meta.is_starred);
+                println!("id: {} | uid: {} | title: {}", response.meta.folder_id, response.meta.folder_uid, response.meta.folder_title);
                 println!("url: {}", response.meta.url);
             }
             Err(error) => {

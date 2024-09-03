@@ -12,6 +12,8 @@
 - Create admin and viewer team
 - Create folder for teams
 - Set folder permissions
+- Add annotations to panels
+- Add dashboards to folders
 
 ## Requests:
 
@@ -31,9 +33,9 @@
 - QueryFolderResponse
 - GetFolderResponse
 
-## Usage:
+## Use case 1: Teams (admin/viewer), Folders, Permissions
 
-````shell
+```shell
 # add a grafana team with admin rights with the name "Team1" and a viewer team with suffix "-Viewer"
 gfi.exe add team -n Team17
 
@@ -69,4 +71,18 @@ gfi.exe get folder -l 3 -p 1
 
 # override folder permissions for only one team with admin permissions in this case
 gfi.exe add permission -f fdu0hhbnheoe8a -t 17 -p 4 
-````
+```
+
+## Use case 2: Dashboards, Annotations, Folders
+
+```shell
+# add a dashboard with the name Dashboard17, a tag with text templated, browser timezone, schema_version 16, 
+# refresh rate in seconds, a simple message and a newly created folder with the title Folder17 where the dashboard moves into
+gfi.exe add dashboard -n Dashboard17 -t templated -z browser -s 16 -r 25 -m "add dashboard into a newly created folder" -c Folder17
+
+# add a dashboard into an existing folder by specifying the folder_uid
+gfi.exe add dashboard -n Dashboard17 -t templated -z browser -s 16 -r 25 -m "add dashboard into an existing folder" -f edwro045bsg74b
+
+# get a dashboard with its meta info by its uid
+gfi.exe get dashboard -u cdwrrb1xgx5vkb
+```
