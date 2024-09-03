@@ -23,4 +23,7 @@ pub enum GrafanaCliError {
 
     /// an error occurred during request body parsing: {0}
     InvalidResponseFormat(String),
+
+    /// can not add a folder without a title
+    CanNotAddFolderWithoutTitle,
 }

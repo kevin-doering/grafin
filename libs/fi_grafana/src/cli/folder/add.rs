@@ -29,29 +29,31 @@ pub struct AddFolderResponse {
     pub version: u32,
 }
 
-pub async fn handle_add_folder(grafana_client: &GrafanaClient, opt: &FolderOptions) {
+pub async fn handle_add_folder(grafana_client: &GrafanaClient, opt: &FolderOptions) -> Result<AddFolderResponse, GrafanaCliError> {
     let title = prompt_option("Enter the folder title: ", &opt.title);
     if let Some(title) = title {
-        match add_folder(grafana_client, title).await {
+        return match add_folder(grafana_client, title).await {
             Ok(response) => {
-                println!("folder url: {}", response.url);
+                println!("Folder created [uid: {}, title: {}]", response.uid, response.title);
+                println!("url: {}", response.url);
+                Ok(response)
             }
             Err(error) => {
                 eprintln!("{}", error);
+                Err(error)
             }
-        }
+        };
     }
+    Err(GrafanaCliError::CanNotAddFolderWithoutTitle)
 }
 
-pub async fn add_folder(grafana_client: &GrafanaClient, title: String) -> Result<AddFolderResponse, GrafanaCliError> {
+async fn add_folder(grafana_client: &GrafanaClient, title: String) -> Result<AddFolderResponse, GrafanaCliError> {
     let request = AddFolderRequest { title: title.clone() };
     match post_add_folder(grafana_client, &request).await {
         Ok(response) => {
-            println!("Folder created [uid: {}, title: {}]", response.uid, title);
             Ok(response)
         }
         Err(error) => {
-            eprintln!("{}", error);
             Err(GrafanaCliError::Request(error))
         }
     }

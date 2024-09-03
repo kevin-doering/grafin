@@ -52,7 +52,7 @@ gfi.exe del team -i 17
 # delete all teams with zero members (delete confirmation required for each team with zero members)
 gfi.exe del team -z
 
-# delete all teams with zero members (delete confirmation given for all teams with zero members)
+# delete all teams with zero members (delete confirmation prematurely given for all teams with zero members)
 gfi.exe del team -z -y
 
 # add folder without team

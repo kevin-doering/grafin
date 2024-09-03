@@ -1,7 +1,8 @@
 use serde::{Deserialize, Serialize};
 
 use crate::api::grafana::GrafanaClient;
-use crate::cli::folder::add::add_folder;
+use crate::cli::folder::add::handle_add_folder;
+use crate::cli::folder::options::FolderOptions;
 use crate::cli::folder::permission::set::{FolderPermissionItem, set_folder_permissions};
 use crate::cli::shell::input::prompt_option;
 use crate::cli::team::options::TeamOptions;
@@ -48,9 +49,9 @@ pub async fn handle_add_team(grafana_client: &GrafanaClient, opt: &TeamOptions) 
         (None, None)
     };
     let folder_uid = if let Some(_) = admin_team_id {
-        if let Some(folder_title) = &opt.folder_title {
+        if opt.folder_title.is_some() {
             // todo: reduce duplication
-            match add_folder(grafana_client, folder_title.clone()).await {
+            match handle_add_folder(grafana_client, &FolderOptions::from_title(opt.folder_title.clone())).await {
                 Ok(response) => {
                     Some(response.uid)
                 }
@@ -61,8 +62,8 @@ pub async fn handle_add_team(grafana_client: &GrafanaClient, opt: &TeamOptions) 
             }
         } else {
             if opt.directory {
-                if let Some(team_name) = &team_name {
-                    match add_folder(grafana_client, team_name.clone()).await {
+                if team_name.is_some() {
+                    match handle_add_folder(grafana_client, &FolderOptions::from_title(team_name.clone())).await {
                         Ok(response) => {
                             Some(response.uid)
                         }

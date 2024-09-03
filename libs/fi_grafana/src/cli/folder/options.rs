@@ -16,3 +16,14 @@ pub struct FolderOptions {
     #[arg(short, long)]
     pub page: Option<u8>,
 }
+
+impl FolderOptions {
+    pub fn from_title(title: Option<String>) -> Self {
+        Self {
+            title,
+            uid: None,
+            limit: None,
+            page: None,
+        }
+    }
+}

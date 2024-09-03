@@ -33,4 +33,7 @@ pub struct DashboardOptions {
     /// Enable overwriting of existing dashboards with the same name or uid
     #[arg(short, long)]
     pub overwrite: bool,
+    /// Use it do create a new folder for the new dashboard
+    #[arg(short, long)]
+    pub create_folder_name: Option<String>,
 }

@@ -92,11 +92,11 @@ pub async fn handle_add(grafana_client: &GrafanaClient, request: AddRequest) {
         NamedResource::A(opt) => {
             handle_add_annotation(grafana_client, &opt).await;
         }
-        NamedResource::Dashboard(opt) => {
-            handle_add_dashboard(grafana_client, &opt).await;
+        NamedResource::Dashboard(mut opt) => {
+            handle_add_dashboard(grafana_client, &mut opt).await.expect("failure while adding a new dashboard");
         }
-        NamedResource::D(opt) => {
-            handle_add_dashboard(grafana_client, &opt).await;
+        NamedResource::D(mut opt) => {
+            handle_add_dashboard(grafana_client, &mut opt).await.expect("failure while adding a new dashboard");
         }
         NamedResource::ServiceAccount(_) => {}
         NamedResource::SA(_) => {}
@@ -109,10 +109,10 @@ pub async fn handle_add(grafana_client: &GrafanaClient, request: AddRequest) {
             handle_add_team(grafana_client, &opt).await;
         }
         NamedResource::Folder(opt) => {
-            handle_add_folder(grafana_client, &opt).await;
+            handle_add_folder(grafana_client, &opt).await.expect("failure while adding a new folder");
         }
         NamedResource::F(opt) => {
-            handle_add_folder(grafana_client, &opt).await;
+            handle_add_folder(grafana_client, &opt).await.expect("failure while adding a new folder");
         }
         NamedResource::Permission(_) => {}
         NamedResource::P(_) => {}
