@@ -20,21 +20,16 @@ create_grafana_annotation() {
   local time
   local timeEnd
 
-  echo "$grafana_url"
-
   # Transform datetime format
   time=$(datetime_to_epoch_ms "$startDatetime")
   timeEnd=$(datetime_to_epoch_ms "$endDatetime")
 
-  echo "$time"
-  echo "$timeEnd"
-
   # Create the JSON payload
   json_payload=$(jq -n \
     --arg dashboardUID "$dashboardUid" \
-    --arg panelId "$panelId" \
-    --arg time "$time" \
-    --arg timeEnd "$timeEnd" \
+    --argjson panelId "$panelId" \
+    --argjson time "$time" \
+    --argjson timeEnd "$timeEnd" \
     --arg tags "$tags" \
     --arg text "$text" \
     '{
@@ -46,8 +41,10 @@ create_grafana_annotation() {
         "text": $text
       }')
 
+  echo "$json_payload"
+
   # Send the POST request to Grafana API
-  response=$(curl -X POST -v "$grafana_url"annotations \
+  response=$(curl -X POST -s "$grafana_url"annotations \
     -H "Accept: application/json" \
     -H "Content-Type: application/json" \
     -H "Authorization: Bearer $api_key" \

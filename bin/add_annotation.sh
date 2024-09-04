@@ -2,6 +2,7 @@
 
 # @author Kevin Doering <k.doering.dt@gmail.com>
 # @description creates annotations within the grafana server database utilizing the grafana http api with cURL
+# @usage ./bin/add_annotation.sh bdvea4glj4fswf 1 "2024-09-04 08:00" "2024-09-04 08:30" tag comment
 
 # get absolute path to script and change context to script folder
 SCRIPT_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -64,16 +65,11 @@ check_if_empty "$comment" "comment"
 validate_datetime_format "$startDatetime" "startDatetime"
 validate_datetime_format "$endDatetime" "endDatetime"
 
-echo "All variables are set, and datetime values are correctly formatted."
+echo "Required variables are set!"
+echo "Datetime values are correctly formatted: [format: %Y-%m-%d %H:%M]"
+echo "Sending an annotation request to the grafana server."
 
 # Create the annotation using the function from the library
 response=$(create_grafana_annotation "$dashboardUid" "$panelId" "$startDatetime" "$endDatetime" "$tags" "$comment" "$GRAFANA_API_PATH" "$SERVICE_ACCOUNT_TOKEN")
 
-echo "$response" | jq .
-
-message=$(echo "$response" | jq -r '.message')
-id=$(echo "$response" | jq -r '.id // empty')
-
-echo "$message"
-check_if_empty "$id" "Annotation ID"
-echo "[id: $id]"
+echo "$response"
