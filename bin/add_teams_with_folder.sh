@@ -1,13 +1,17 @@
 #!/bin/bash
 
+SCRIPT_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "${SCRIPT_PATH}" || exit
+
+source ./grafana_lib.sh
+
+dotenv
+
 team="$1"
 orgId="${2:1}"
 folder="$team"
 admin="$team"
 viewer="$team-Viewer"
-
-API="https://etaps.grafana.intern/api"
-TOKEN="<grafana_service_account_token>"
 
 function is_team_name_taken {
   local name="$1"
@@ -23,19 +27,19 @@ function is_team_name_taken {
 
 function check_team_exists {
   local query_name="$1"
-  response=$(curl -s -X GET "$API/teams/search?query=$query_name" \
+  response=$(curl -s -X GET "$GRAFANA_API_PATH/teams/search?query=$query_name" \
     -H "Accept: application/json" \
-    -H "Authorization: Bearer $TOKEN")
+    -H "Authorization: Bearer $SERVICE_ACCOUNT_TOKEN")
   echo "$response"
 }
 
 function add_team {
   local team="$1"
   local org_id="${2:1}"
-  response=$(curl -s -X POST $API/teams \
+  response=$(curl -s -X POST "$GRAFANA_API_PATH"/teams \
     -H "Accept: application/json" \
     -H "Content-Type: application/json" \
-    -H "Authorization: Bearer $TOKEN" \
+    -H "Authorization: Bearer $SERVICE_ACCOUNT_TOKEN" \
     -d '{
         "name": "'"$team"'",
         "orgId": "'"$org_id"'"
@@ -45,10 +49,10 @@ function add_team {
 
 function add_team_folder {
   local folder="$1"
-  response=$(curl -s -X POST "$API/folders" \
+  response=$(curl -s -X POST "$GRAFANA_API_PATH/folders" \
     -H "Accept: application/json" \
     -H "Content-Type: application/json" \
-    -H "Authorization: Bearer $TOKEN" \
+    -H "Authorization: Bearer $SERVICE_ACCOUNT_TOKEN" \
     -d '{
         "title": "'"$folder"'"
     }')
@@ -56,13 +60,15 @@ function add_team_folder {
 }
 
 function set_team_folder_permission {
-  local folder_uid=$(echo "$1" | tr -d '"')
+  local folder_uid="$1"
   local admin_team_id="$2"
   local viewer_team_id="$3"
-  response=$(curl -s -X POST "$API/folders/$folder_uid/permissions" \
+
+  folder_uid=$(echo "$folder_uid" | tr -d '"')
+  response=$(curl -s -X POST "$GRAFANA_API_PATH/folders/$folder_uid/permissions" \
     -H "Accept: application/json" \
     -H "Content-Type: application/json" \
-    -H "Authorization: Bearer $TOKEN" \
+    -H "Authorization: Bearer $SERVICE_ACCOUNT_TOKEN" \
     -d '{
         "items": [
           {

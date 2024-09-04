@@ -1,18 +1,23 @@
 #!/bin/bash
 
-API="https://etaps.grafana.intern/api"
-TOKEN="<grafana_service_account_token>"
+SCRIPT_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "${SCRIPT_PATH}" || exit
+
+source ./grafana_lib.sh
+
+dotenv
+
 teamIds=".created_teams.txt"
-folderUids=".created_folders.txt"
+folderUIDs=".created_folders.txt"
 
 function delete_resource {
   local resource="$1"
   local id="$2"
   response=$(
-    curl -s -X DELETE "$API/$resource/$id" \
+    curl -s -X DELETE "$GRAFANA_API_PATH/$resource/$id" \
       -H "Accept: application/json" \
       -H "Content-Type: application/json" \
-      -H "Authorization: Bearer $TOKEN"
+      -H "Authorization: Bearer $SERVICE_ACCOUNT_TOKEN"
   )
   message=$(echo "$response" | jq '.message')
   echo "$message"
@@ -27,13 +32,13 @@ else
   echo "File with $teamIds does not exist."
 fi
 
-if [[ -f "$folderUids" ]]; then
+if [[ -f "$folderUIDs" ]]; then
   while IFS= read -r folderUid; do
     msg=$(delete_resource "folders" "$folderUid")
     echo "$msg : $folderUid"
-  done <"$folderUids"
+  done <"$folderUIDs"
 else
-  echo "File with $folderUids does not exist."
+  echo "File with $folderUIDs does not exist."
 fi
 
 time=$(date +"%Y-%m-%d %H:%M:%S")
