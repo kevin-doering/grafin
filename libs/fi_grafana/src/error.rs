@@ -1,10 +1,10 @@
 #[derive(Debug, thiserror::Error, displaydoc::Display)]
 pub enum GrafanaCliError {
-    /// a network error occurred: {0}
-    Request(#[from] reqwest::Error),
-
     /// an I/O error occurred: {0}
     IO(#[from] std::io::Error),
+
+    /// a network error occurred: {0}
+    Request(#[from] reqwest::Error),
 
     /// no team id received from grafana server on team creation
     NoTeamIdReceivedFromGrafanaOnTeamCreation,
@@ -26,4 +26,7 @@ pub enum GrafanaCliError {
 
     /// can not add a folder without a title
     CanNotAddFolderWithoutTitle,
+
+    /// can not encode url params to string: {0}
+    CanNotEncodeUrlParamToString(#[from] serde_url_params::Error),
 }

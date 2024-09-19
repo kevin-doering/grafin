@@ -4,14 +4,15 @@ use crate::api::grafana::GrafanaClient;
 use crate::cli::dashboard::options::DashboardOptions;
 use crate::error::GrafanaCliError;
 
-#[derive(Deserialize, Clone)]
+#[derive(Debug, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct GetDashboardResponse {
     pub dashboard: GetDashboard,
     pub meta: GetDashboardMeta,
 }
 
-#[derive(Deserialize, Clone)]
+/// Some fields which the response conditionally contains are omitted
+#[derive(Debug, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct GetDashboard {
     /// The incremental id of the grafana instance
@@ -28,9 +29,38 @@ pub struct GetDashboard {
     pub schema_version: u16,
     /// The dashboard version
     pub version: u8,
+    /// The available panels of the dashboard
+    pub panels: Option<Vec<GetPanel>>,
 }
 
-#[derive(Deserialize, Clone)]
+/// Some fields which the response conditionally contains are omitted
+#[derive(Debug, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct GetPanel {
+    pub id: u32,
+    pub title: String,
+    pub r#type: String,
+    pub datasource: GetPanelDataSource,
+    pub grid_pos: GetPanelGridPosition,
+}
+
+#[derive(Debug, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct GetPanelDataSource {
+    pub r#type: String,
+    pub uid: String,
+}
+
+#[derive(Debug, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct GetPanelGridPosition {
+    pub h: u16,
+    pub w: u16,
+    pub x: u16,
+    pub y: u16,
+}
+
+#[derive(Debug, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct GetDashboardMeta {
     pub r#type: String,
@@ -58,14 +88,14 @@ pub struct GetDashboardMeta {
     pub annotations_permissions: AnnotationsPermissions,
 }
 
-#[derive(Deserialize, Clone)]
+#[derive(Debug, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct AnnotationsPermissions {
     pub dashboard: DashboardAnnotationPermissions,
     pub organization: OrganizationAnnotationPermissions,
 }
 
-#[derive(Deserialize, Clone)]
+#[derive(Debug, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct DashboardAnnotationPermissions {
     pub can_add: bool,
@@ -73,7 +103,7 @@ pub struct DashboardAnnotationPermissions {
     pub can_delete: bool,
 }
 
-#[derive(Deserialize, Clone)]
+#[derive(Debug, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct OrganizationAnnotationPermissions {
     pub can_add: bool,
@@ -83,7 +113,7 @@ pub struct OrganizationAnnotationPermissions {
 
 pub async fn handle_get_dashboard(grafana_client: &GrafanaClient, opt: &DashboardOptions) {
     if let Some(uid) = &opt.uid {
-        match get_dashboard_by_uid(grafana_client, uid.clone()).await {
+        match get_dashboard_by_uid(grafana_client, uid).await {
             Ok(response) => {
                 println!("Dashboard:");
                 println!("id: {} | uid: {} | name: {}", response.dashboard.id, response.dashboard.uid, response.dashboard.title);
@@ -100,7 +130,7 @@ pub async fn handle_get_dashboard(grafana_client: &GrafanaClient, opt: &Dashboar
     }
 }
 
-async fn get_dashboard_by_uid(grafana_client: &GrafanaClient, uid: String) -> Result<GetDashboardResponse, GrafanaCliError> {
+pub async fn get_dashboard_by_uid(grafana_client: &GrafanaClient, uid: &String) -> Result<GetDashboardResponse, GrafanaCliError> {
     match grafana_client.get(&format!("dashboards/uid/{}", uid)).await {
         Ok(response) => Ok(response.json::<GetDashboardResponse>().await?),
         Err(error) => Err(GrafanaCliError::Request(error))

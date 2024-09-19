@@ -3,7 +3,9 @@ use serde_with::serde_derive::Serialize;
 
 use crate::api::grafana::GrafanaClient;
 use crate::cli::annotation::options::AnnotationOptions;
-use crate::cli::shell::date::{DATETIME_FORMAT, parse_datetime_to_epoch_time_millis};
+use crate::cli::dashboard::get::get_dashboard_by_uid;
+use crate::cli::dashboard::search::{DASH_DB_TYPE, DASH_FOLDER_TYPE, get_dash_type_uids, SearchDashTypeRequest, TIME_SERIES_PANEL_TYPE};
+use crate::cli::shell::date::{DATETIME_FORMAT, from_datetime_to_epoch_time_millis, parse_datetime_to_epoch_time_millis};
 use crate::cli::shell::input::prompt_option;
 use crate::error::GrafanaCliError;
 
@@ -34,21 +36,24 @@ pub struct AddAnnotationResponse {
 }
 
 pub async fn handle_add_annotation(grafana_client: &GrafanaClient, opt: &AnnotationOptions) {
-    if opt.organizational {
-        match add_organizational_annotation(grafana_client, opt).await {
+    if opt.all_panel_where_dashboard_name_is_like.is_some() || opt.within_folders_where_folder_name_is_like.is_some() {
+        match add_annotations_to_all_panel_within_the_specified_dash_type_scope(grafana_client, opt).await {
             Ok(response) => {
-                if let Some(id) = response.id {
-                    println!("{} [id: {}]", response.message, id);
-                } else {
-                    println!("{}", response.message);
+                for r in &response {
+                    if let Some(id) = r.id {
+                        println!("id: {}", id);
+                        println!("message: {}", r.message);
+                    }
                 }
             }
             Err(error) => {
                 eprintln!("{}", error);
             }
         }
-    } else {
-        match add_annotation_to_dashboard_panel(grafana_client, opt).await {
+        return;
+    }
+    if opt.organizational {
+        return match add_organizational_annotation(grafana_client, opt).await {
             Ok(response) => {
                 if let Some(id) = response.id {
                     println!("{} [id: {}]", response.message, id);
@@ -59,11 +64,86 @@ pub async fn handle_add_annotation(grafana_client: &GrafanaClient, opt: &Annotat
             Err(error) => {
                 eprintln!("{}", error);
             }
+        };
+    }
+    match add_annotation_to_dashboard_panel(grafana_client, opt).await {
+        Ok(response) => {
+            if let Some(id) = response.id {
+                println!("{} [id: {}]", response.message, id);
+            } else {
+                println!("{}", response.message);
+            }
+        }
+        Err(error) => {
+            eprintln!("{}", error);
         }
     }
 }
 
-pub async fn add_organizational_annotation(grafana_client: &GrafanaClient, opt: &AnnotationOptions) -> Result<AddAnnotationResponse, GrafanaCliError> {
+async fn add_annotations_to_all_panel_within_the_specified_dash_type_scope(grafana_client: &GrafanaClient, opt: &AnnotationOptions) -> Result<Vec<AddAnnotationResponse>, GrafanaCliError> {
+    let time = if let Some(start) = &opt.start_datetime {
+        Some(from_datetime_to_epoch_time_millis(start)?)
+    } else {
+        return Err(GrafanaCliError::CanNotParseTheStartDateTimeToEpochTimeMillis);
+    };
+    let time_end = if let Some(end) = &opt.end_datetime {
+        Some(from_datetime_to_epoch_time_millis(end)?)
+    } else {
+        return Err(GrafanaCliError::CanNotParseTheEndDateTimeToEpochTimeMillis);
+    };
+    let folder_uids = if let Some(folder_name) = &opt.within_folders_where_folder_name_is_like {
+        let request = SearchDashTypeRequest::type_query(DASH_FOLDER_TYPE.to_string(), folder_name.clone());
+        get_dash_type_uids(grafana_client, request).await?
+    } else {
+        vec![]
+    };
+    let dashboard_uids = if let Some(dashboard_name) = &opt.all_panel_where_dashboard_name_is_like {
+        let request = SearchDashTypeRequest::type_query(DASH_DB_TYPE.to_string(), dashboard_name.clone());
+        get_dash_type_uids(grafana_client, request).await?
+    } else {
+        vec![]
+    };
+    let named_dashboard_uids = get_dash_type_uids(grafana_client, SearchDashTypeRequest {
+        r#type: Some(DASH_DB_TYPE.to_string()),
+        query: None,
+        folder_uids: Some(folder_uids),
+        dashboard_uids: Some(dashboard_uids),
+    }).await?;
+    Ok(add_annotation_to_all_panels_with_type(grafana_client, TIME_SERIES_PANEL_TYPE, named_dashboard_uids, opt, time, time_end).await?)
+}
+
+async fn add_annotation_to_all_panels_with_type(
+    grafana_client: &GrafanaClient,
+    panel_type: &str,
+    dashboard_uids: Vec<String>,
+    opt: &AnnotationOptions,
+    time: Option<i64>,
+    time_end: Option<i64>,
+) -> Result<Vec<AddAnnotationResponse>, GrafanaCliError> {
+    let mut responses = vec![];
+    for dashboard_uid in &dashboard_uids {
+        let response = get_dashboard_by_uid(grafana_client, dashboard_uid).await?;
+        if let Some(panels) = response.dashboard.panels {
+            for panel in panels {
+                if panel.r#type.eq(panel_type) {
+                    let request = AddAnnotationRequest {
+                        dashboard_uid: Some(dashboard_uid.clone()),
+                        panel_id: Some(panel.id.clone()),
+                        time,
+                        time_end,
+                        tags: opt.tags.clone(),
+                        text: opt.comment.clone(),
+                    };
+                    responses.push(post_add_annotation(grafana_client, &request).await?);
+                }
+            }
+        }
+    }
+    Ok(responses)
+}
+
+
+async fn add_organizational_annotation(grafana_client: &GrafanaClient, opt: &AnnotationOptions) -> Result<AddAnnotationResponse, GrafanaCliError> {
     if opt.dashboard_uid.is_some() {
         println!("Ignoring the 'dashboard_uid' because the 'organizational' flag is present which does not require a dashboard reference");
     }
@@ -88,7 +168,7 @@ pub async fn add_organizational_annotation(grafana_client: &GrafanaClient, opt: 
 }
 
 
-pub async fn add_annotation_to_dashboard_panel(grafana_client: &GrafanaClient, opt: &AnnotationOptions) -> Result<AddAnnotationResponse, GrafanaCliError> {
+async fn add_annotation_to_dashboard_panel(grafana_client: &GrafanaClient, opt: &AnnotationOptions) -> Result<AddAnnotationResponse, GrafanaCliError> {
     let dashboard_uid = prompt_option("Enter a dashboard_uid: ", &opt.dashboard_uid);
     let panel_id = prompt_option("Enter a panel_id: ", &opt.panel_id);
     let time = prompt_option(&format!("Enter a start_datetime [format: {}]: ", DATETIME_FORMAT), &opt.start_datetime);

@@ -10,6 +10,7 @@ chrono = { workspace = true }
 clap = { workspace = true }
 reqwest = { workspace = true }
 serde = { workspace = true }
+serde_url_params = { workspace = true }
 serde_with = { workspace = true }
 serde_json = { workspace = true }
 serde_yaml = { workspace = true }
