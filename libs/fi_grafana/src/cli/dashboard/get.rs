@@ -11,7 +11,7 @@ pub struct GetDashboardResponse {
     pub meta: GetDashboardMeta,
 }
 
-/// Some fields which the response conditionally contains are omitted
+/// Some conditional fields of the resource are omitted (there are more to work with)
 #[derive(Debug, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct GetDashboard {
@@ -33,7 +33,7 @@ pub struct GetDashboard {
     pub panels: Option<Vec<GetPanel>>,
 }
 
-/// Some fields which the response conditionally contains are omitted
+/// Some conditional fields of the resource are omitted (there are more to work with)
 #[derive(Debug, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct GetPanel {
