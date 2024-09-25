@@ -78,7 +78,8 @@ function create_grafana_annotation {
     -H "Accept: application/json" \
     -H "Content-Type: application/json" \
     -H "Authorization: Bearer $api_key" \
-    -d "$json_payload")
+    -d "$json_payload"
+  )
 
   echo "$response"
 }
@@ -98,21 +99,83 @@ function add_annotations_to_all_panel_within_the_specified_dash_type_scope {
   local folderUids
   local dashboardUids
   local namedDashboardUids
-
-  # Transform datetime format
-  time=$(datetime_to_epoch_ms "$startDatetime")
-  timeEnd=$(datetime_to_epoch_ms "$endDatetime")
+  local panelType
 
   # Find uids of dash types matching the given names
   folderUids=$(get_dash_type_uids_by_name "dash-folder" "$folderName" "$grafana_url" "$api_key")
   dashboardUids=$(get_dash_type_uids_by_name "dash-db" "$dashboardName" "$grafana_url" "$api_key")
   namedDashboardUids=$(get_named_dash_type_uids "dash-db" "$folderUids" "$dashboardUids" "$grafana_url" "$api_key")
 
-  # todo: get each dashboard by uid
-  # todo: filter panels by panel type timeseries
-  # todo: post anno for each panel
+  panelType="timeseries"
+  for duid in $namedDashboardUids; do
+    response=$(get_dashboard_by_uid "$duid" "$grafana_url" "$api_key")
+    dashboard=$(get_dashboard_from_response "$response")
+    panels=$(get_panels_from_dashboard "$dashboard")
+    timeseriesPanels=$(filter_by_type "$panelType" "$panels")
 
-  echo ""
+    mapfile -t panelIds < <(echo "$timeseriesPanels" | jq -r 'sort_by(.id) | .[].id')
+    mapfile -t panelTitles < <(echo "$timeseriesPanels" | jq -r 'sort_by(.id) | .[].title')
+
+    index=0
+    for pid in "${panelIds[@]}"; do
+      title=${panelTitles[$index]}
+      response=$(ask_for_confirmation_before_adding_annotation "$pid" "$title" "$duid" "$startDatetime" "$endDatetime" "$tags" "$text" "$grafana_url" "$api_key")
+      echo "$response"
+      index=$((index + 1))
+    done
+  done
+}
+
+function ask_for_confirmation_before_adding_annotation {
+  local panelId="$1"
+  local panelTitle="$2"
+  local dashboardUid="$3"
+  local startDatetime="$4"
+  local endDatetime="$5"
+  local tags="$6"
+  local text="$7"
+  local grafana_url="$8"
+  local api_key="$9"
+
+  read -r -p "Confirm annotation on panel with id: $panelId, title: $panelTitle? (y/n): " confirmation
+  if [[ "$confirmation" == "y" ]]; then
+    response=$(create_grafana_annotation "$dashboardUid" "$panelId" "$startDatetime" "$endDatetime" "$tags" "$text" "$grafana_url" "$api_key")
+    echo "$response"
+  else
+    echo "No confirmation: Skipping panel with id: $panelId, title: $panelTitle"
+  fi
+}
+
+function filter_by_type {
+  local type="$1"
+  local panels="$2"
+  timeseriesPanels=$(echo "$panels" | jq --arg panelType "$type" '[.[] | select(.type == $panelType)]')
+  echo "$timeseriesPanels"
+}
+
+function get_panels_from_dashboard {
+  local dashboard="$1"
+  panels=$(echo "$dashboard" | jq '.panels')
+  echo "$panels"
+}
+
+function get_dashboard_from_response {
+  local response="$1"
+  dashboard=$(echo "$response" | jq '.dashboard')
+  echo "$dashboard"
+}
+
+function get_dashboard_by_uid {
+  local dashboardUid="$1"
+  local grafana_url="$2"
+  local api_key="$3"
+
+  resource="dashboards/uid/$dashboardUid"
+  response=$(curl -s -X GET "$grafana_url""$resource" \
+      -H "Accept: application/json" \
+      -H "Authorization: Bearer $api_key"
+  )
+  echo "$response"
 }
 
 function get_dash_type_uids_by_name {
@@ -125,7 +188,8 @@ function get_dash_type_uids_by_name {
   resource="search?query=$query&type=$type"
   response=$(curl -s -X GET "$grafana_url""$resource" \
       -H "Accept: application/json" \
-      -H "Authorization: Bearer $api_key")
+      -H "Authorization: Bearer $api_key"
+  )
   uids=$(echo "$response" | jq -r '.[].uid')
 
   echo "$uids"
@@ -148,8 +212,13 @@ function get_named_dash_type_uids {
   done
   response=$(curl -s -X GET "$grafana_url""$resource" \
       -H "Accept: application/json" \
-      -H "Authorization: Bearer $api_key")
+      -H "Authorization: Bearer $api_key"
+  )
   uids=$(echo "$response" | jq -r '.[].uid')
 
   echo "$uids"
+}
+
+function delimiter {
+  echo "---"
 }

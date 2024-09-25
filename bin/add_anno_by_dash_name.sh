@@ -28,18 +28,19 @@ check_if_empty "$GRAFANA_API_PATH" "GRAFANA_API_PATH"
 # Check each variable passed as argument
 check_if_empty "$folderName" "folderName"
 check_if_empty "$dashboardName" "dashboardName"
-# check_if_empty "$startDatetime" "startDatetime"
-# check_if_empty "$endDatetime" "endDatetime"
-# check_if_empty "$tags" "tags"
-# check_if_empty "$comment" "comment"
+check_if_empty "$startDatetime" "startDatetime"
+check_if_empty "$endDatetime" "endDatetime"
+check_if_empty "$tags" "tags"
+check_if_empty "$comment" "comment"
 
 # Validate startDatetime and endDatetime formats
-# validate_datetime_format "$startDatetime" "startDatetime"
-# validate_datetime_format "$endDatetime" "endDatetime"
+validate_datetime_format "$startDatetime" "startDatetime"
+validate_datetime_format "$endDatetime" "endDatetime"
 
 echo "Required variables are set!"
-# echo "Datetime values are correctly formatted: [format: %Y-%m-%d %H:%M]"
+echo "Datetime values are correctly formatted: [format: %Y-%m-%d %H:%M]"
 echo "Sending annotation requests to the grafana server."
+delimiter
 
 # Create the annotation using the function from the library
 response=$(add_annotations_to_all_panel_within_the_specified_dash_type_scope "$folderName" "$dashboardName" "$startDatetime" "$endDatetime" "$tags" "$comment" "$GRAFANA_API_PATH" "$SERVICE_ACCOUNT_TOKEN")

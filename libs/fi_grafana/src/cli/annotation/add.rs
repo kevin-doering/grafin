@@ -134,6 +134,7 @@ async fn add_annotation_to_all_panels_with_type(
                         tags: opt.tags.clone(),
                         text: opt.comment.clone(),
                     };
+                    // todo: ask the user for confirmation to add an annotation to the panel
                     responses.push(post_add_annotation(grafana_client, &request).await?);
                 }
             }
