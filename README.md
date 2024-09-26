@@ -95,3 +95,13 @@ gfi.exe add annotation -t maintenance -c comment -s '2024-09-03 11:00' -e '2024-
 # add an point annotation with a maintenance tag to a dashboard panel which shows time series data
 gfi.exe add annotation -t maintenance -c comment -s '2024-09-03 10:30' -d bdvea4glj4fswf -p 1
 ```
+
+## Use cane 3: add annotations to all panels within the specified folder/dashboard scope
+
+```shell
+# add annotation to all panel in -a (all dashboards) -w (within folder) by name (-a -w optional - one of)
+gfi.exe add annotation -a testd -w testf -c comment -s '2024-09-19 11:00' -e '2024-09-19 11:30' -t tag
+
+# or in folder all dashboard by name from time to time with tag and comment (all required) 
+./bin/add_anno_to_panels_in_scope.sh folderName dashboardName "2024-09-04 08:00" "2024-09-04 08:30" tag comment
+```

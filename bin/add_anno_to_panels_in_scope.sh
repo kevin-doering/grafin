@@ -2,7 +2,7 @@
 
 # @author Kevin Doering <k.doering.dt@gmail.com>
 # @description Adds annotations to all panels within the named dashboard/folder scope by sending multiple requests to the grafana server utilizing cURL and jq.
-# @usage ./bin/add_annotation.sh bdvea4glj4fswf 1 "2024-09-04 08:00" "2024-09-04 08:30" tag comment
+# @usage ./bin/add_anno_to_panels_in_scope.sh folderName dashboardName "2024-09-04 08:00" "2024-09-04 08:30" tag comment
 
 # get absolute path to script and change context to script folder
 SCRIPT_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -42,7 +42,7 @@ echo "Datetime values are correctly formatted: [format: %Y-%m-%d %H:%M]"
 echo "Sending annotation requests to the grafana server."
 delimiter
 
-# Create the annotation using the function from the library
+# Create the annotation using the sourced functional library
 response=$(add_annotations_to_all_panel_within_the_specified_dash_type_scope "$folderName" "$dashboardName" "$startDatetime" "$endDatetime" "$tags" "$comment" "$GRAFANA_API_PATH" "$SERVICE_ACCOUNT_TOKEN")
 
 echo "$response"
