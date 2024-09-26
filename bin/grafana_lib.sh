@@ -85,6 +85,7 @@ function create_grafana_annotation {
 }
 
 function add_annotations_to_all_panel_within_the_specified_dash_type_scope {
+  # params
   local folderName="$1"
   local dashboardName="$2"
   local startDatetime="$3"
@@ -94,6 +95,7 @@ function add_annotations_to_all_panel_within_the_specified_dash_type_scope {
   local grafana_url="$7"
   local api_key="$8"
 
+  # vars
   local time
   local timeEnd
   local folderUids
@@ -113,6 +115,7 @@ function add_annotations_to_all_panel_within_the_specified_dash_type_scope {
     panels=$(get_panels_from_dashboard "$dashboard")
     timeseriesPanels=$(filter_by_type "$panelType" "$panels")
 
+    # handle type filtered json arrays by extracting sorted arrays of ids and titles
     mapfile -t panelIds < <(echo "$timeseriesPanels" | jq -r 'sort_by(.id) | .[].id')
     mapfile -t panelTitles < <(echo "$timeseriesPanels" | jq -r 'sort_by(.id) | .[].title')
 
