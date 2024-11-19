@@ -14,7 +14,7 @@ function delete_resource {
   local resource="$1"
   local id="$2"
   response=$(
-    curl -s -X DELETE "$GRAFANA_API_PATH/$resource/$id" \
+    curl -X DELETE "$GRAFANA_API_PATH/$resource/$id" \
       -H "Accept: application/json" \
       -H "Content-Type: application/json" \
       -H "Authorization: Bearer $SERVICE_ACCOUNT_TOKEN"

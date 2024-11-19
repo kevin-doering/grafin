@@ -19,15 +19,16 @@ function is_team_name_taken {
   count=$(echo "$team" | jq '.totalCount')
   # team_count is a valid number and greater than 0
   if [[ "$count" =~ ^[0-9]+$ ]] && [[ "$count" -gt 0 ]]; then
-    echo "The team name: $name is already taken. Try another one! Exiting.." && exit
+    echo "y"
   else
+    echo "n"
     echo "Generating team with name: $name"
   fi
 }
 
 function check_team_exists {
   local query_name="$1"
-  response=$(curl -s -X GET "$GRAFANA_API_PATH/teams/search?query=$query_name" \
+  response=$(curl "$GRAFANA_API_PATH/teams/search?query=$query_name" \
     -H "Accept: application/json" \
     -H "Authorization: Bearer $SERVICE_ACCOUNT_TOKEN")
   echo "$response"
@@ -36,7 +37,7 @@ function check_team_exists {
 function add_team {
   local team="$1"
   local org_id="${2:1}"
-  response=$(curl -s -X POST "$GRAFANA_API_PATH"/teams \
+  response=$(curl -X POST "${GRAFANA_API_PATH}/teams" \
     -H "Accept: application/json" \
     -H "Content-Type: application/json" \
     -H "Authorization: Bearer $SERVICE_ACCOUNT_TOKEN" \
@@ -49,7 +50,7 @@ function add_team {
 
 function add_team_folder {
   local folder="$1"
-  response=$(curl -s -X POST "$GRAFANA_API_PATH/folders" \
+  response=$(curl -X POST "${GRAFANA_API_PATH}/folders" \
     -H "Accept: application/json" \
     -H "Content-Type: application/json" \
     -H "Authorization: Bearer $SERVICE_ACCOUNT_TOKEN" \
@@ -65,7 +66,7 @@ function set_team_folder_permission {
   local viewer_team_id="$3"
 
   folder_uid=$(echo "$folder_uid" | tr -d '"')
-  response=$(curl -s -X POST "$GRAFANA_API_PATH/folders/$folder_uid/permissions" \
+  response=$(curl -X POST "${GRAFANA_API_PATH}/folders/$folder_uid/permissions" \
     -H "Accept: application/json" \
     -H "Content-Type: application/json" \
     -H "Authorization: Bearer $SERVICE_ACCOUNT_TOKEN" \
@@ -98,8 +99,16 @@ function set_team_folder_permission {
 
 isAdminTeamNameTaken=$(is_team_name_taken "$admin")
 isViewerTeamNameTaken=$(is_team_name_taken "$viewer")
-echo "$isAdminTeamNameTaken"
-echo "$isViewerTeamNameTaken"
+
+if [ "$isAdminTeamNameTaken" == "y" ]; then
+  echo "The team name: $admin is already taken. Try another one! Exiting.."
+  exit
+fi
+
+if [ "$isViewerTeamNameTaken" == "y" ]; then
+  echo "The team name: $viewer is already taken. Try another one! Exiting.."
+  exit
+fi
 
 addAdminTeamResponse=$(add_team "$admin" "$orgId")
 addViewerTeamResponse=$(add_team "$viewer" "$orgId")
@@ -111,9 +120,10 @@ echo "$adminTeamMessage [id: $adminTeamId, name: $admin]"
 echo "$viewerTeamMessage [id: $viewerTeamId, name: $viewer]"
 
 addFolderResponse=$(add_team_folder "$folder")
+echo "$addFolderResponse"
 folderUid=$(echo "$addFolderResponse" | jq '.uid')
 folderTitle=$(echo "$addFolderResponse" | jq '.title')
-echo "Folder created [uid: $folderUid, title: $folderTitle]"
+echo "Folder: [uid: $folderUid, title: $folderTitle]"
 
 setPermissionResponse=$(set_team_folder_permission "$folderUid" "$adminTeamId" "$viewerTeamId")
 setPermissionMessage=$(echo "$setPermissionResponse" | jq '.message')

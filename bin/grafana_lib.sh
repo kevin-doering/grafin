@@ -74,11 +74,12 @@ function create_grafana_annotation {
       }')
 
   # Send the POST request to Grafana API
-  response=$(curl -X POST -s "$grafana_url"annotations \
-    -H "Accept: application/json" \
-    -H "Content-Type: application/json" \
-    -H "Authorization: Bearer $api_key" \
-    -d "$json_payload"
+  response=$(
+    curl -X POST -s "${grafana_url}/annotations" \
+      -H "Accept: application/json" \
+      -H "Content-Type: application/json" \
+      -H "Authorization: Bearer $api_key" \
+      -d "$json_payload"
   )
 
   echo "$response"
@@ -174,7 +175,8 @@ function get_dashboard_by_uid {
   local api_key="$3"
 
   resource="dashboards/uid/$dashboardUid"
-  response=$(curl -s -X GET "$grafana_url""$resource" \
+  response=$(
+    curl "${grafana_url}/${resource}" \
       -H "Accept: application/json" \
       -H "Authorization: Bearer $api_key"
   )
@@ -189,7 +191,8 @@ function get_dash_type_uids_by_name {
   local resource
 
   resource="search?query=$query&type=$type"
-  response=$(curl -s -X GET "$grafana_url""$resource" \
+  response=$(
+    curl "${grafana_url}/${resource}" \
       -H "Accept: application/json" \
       -H "Authorization: Bearer $api_key"
   )
@@ -213,7 +216,8 @@ function get_named_dash_type_uids {
   for duid in $dashboardUids; do
     resource+="&dashboardUIDs=$duid"
   done
-  response=$(curl -s -X GET "$grafana_url""$resource" \
+  response=$(
+    curl "${grafana_url}/${resource}" \
       -H "Accept: application/json" \
       -H "Authorization: Bearer $api_key"
   )
